@@ -1,0 +1,93 @@
+{% extends 'base.html' %}
+
+{% block title %}Períodos Acadêmicos{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2>Períodos Acadêmicos</h2>
+    <a href="{{ url_for('periodo.novo') }}" class="btn btn-primary">
+        <i class="fas fa-plus"></i> Novo Período
+    </a>
+</div>
+
+<div class="card">
+    <div class="card-body">
+        {% if periodos %}
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead class="thead-light">
+                        <tr>
+                            <th>ID</th>
+                            <th>Descrição</th>
+                            <th>Data Inicial</th>
+                            <th>Data Final</th>
+                            <th>Duração (dias)</th>
+                            <th>Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for periodo in periodos %}
+                            <tr>
+                                <td>{{ periodo.id_periodo }}</td>
+                                <td>{{ periodo.descricao }}</td>
+                                <td>{{ periodo.datainicial.strftime('%d/%m/%Y') }}</td>
+                                <td>{{ periodo.datafinal.strftime('%d/%m/%Y') }}</td>
+                                <td>{{ (periodo.datafinal - periodo.datainicial).days + 1 }}</td>
+                                <td>
+                                    <div class="btn-group btn-group-sm">
+                                        <a href="{{ url_for('periodo.editar', id=periodo.id_periodo) }}" class="btn btn-outline-primary">
+                                            <i class="fas fa-edit"></i>
+                                        </a>
+                                        <button type="button" class="btn btn-outline-danger" 
+                                                onclick="confirmarExclusao('{{ periodo.id_periodo }}', '{{ periodo.descricao }}')">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <div class="alert alert-info">
+                Nenhum período cadastrado.
+            </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Modal de confirmação de exclusão -->
+<div class="modal fade" id="confirmarExclusaoModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Confirmar Exclusão</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <p>Deseja realmente excluir o período <strong id="periodoNome"></strong>?</p>
+                <p class="text-danger">Esta ação não pode ser desfeita.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
+                <form id="formExcluir" method="POST">
+                    <button type="submit" class="btn btn-danger">Excluir</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    function confirmarExclusao(id, nome) {
+        document.getElementById('periodoNome').textContent = nome;
+        document.getElementById('formExcluir').action = "{{ url_for('periodo.excluir', id=0) }}".replace('0', id);
+        $('#confirmarExclusaoModal').modal('show');
+    }
+</script>
+{% endblock %}

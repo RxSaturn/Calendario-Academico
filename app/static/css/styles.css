@@ -1,0 +1,43 @@
+body {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+.footer {
+    margin-top: auto;
+}
+
+/* Estilos para calendários */
+.fc-event {
+    border-radius: 3px;
+    border: none;
+}
+
+/* Cores personalizadas por categoria */
+.categoria-aulas {
+    background-color: #3788d8;
+}
+
+.categoria-provas {
+    background-color: #d81b60;
+}
+
+.categoria-feriados {
+    background-color: #8e24aa;
+}
+
+.categoria-reunioes {
+    background-color: #795548;
+}
+
+.categoria-palestras {
+    background-color: #607d8b;
+}
+
+/* Cards hover effect */
+.card-hover:hover {
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    transform: translateY(-5px);
+    transition: all 0.3s ease;
+}

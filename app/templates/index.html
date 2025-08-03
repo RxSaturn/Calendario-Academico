@@ -1,0 +1,85 @@
+{% extends 'base.html' %}
+
+{% block title %}Sistema de Calendário Acadêmico - Início{% endblock %}
+
+{% block content %}
+<div class="jumbotron">
+    <h1 class="display-4">Sistema de Calendário Acadêmico</h1>
+    <p class="lead">Gerencie períodos, calendários e eventos acadêmicos de forma fácil e eficiente.</p>
+    <hr class="my-4">
+    <p>Acesse os calendários ativos abaixo ou utilize o menu de navegação para gerenciar todos os recursos.</p>
+</div>
+
+<div class="row">
+    <div class="col-md-8">
+        <div class="card mb-4">
+            <div class="card-header bg-primary text-white">
+                <h4 class="mb-0">Calendários Ativos</h4>
+            </div>
+            <div class="card-body">
+                {% if calendarios %}
+                    <div class="row">
+                        {% for calendario in calendarios %}
+                            <div class="col-md-6 mb-3">
+                                <div class="card h-100">
+                                    <div class="card-body">
+                                        <h5 class="card-title">{{ calendario.nome }}</h5>
+                                        <h6 class="card-subtitle mb-2 text-muted">{{ calendario.tipo_calendario.nome }}</h6>
+                                        <p class="card-text">
+                                            <small>
+                                                <strong>Ano:</strong> {{ calendario.ano }}<br>
+                                                <strong>Período:</strong> {{ calendario.datainicio.strftime('%d/%m/%Y') }} a {{ calendario.datafim.strftime('%d/%m/%Y') }}
+                                            </small>
+                                        </p>
+                                    </div>
+                                    <div class="card-footer">
+                                        <a href="{{ url_for('evento.eventos_calendario', id=calendario.id_calendario) }}" class="btn btn-primary btn-sm">
+                                            <i class="far fa-calendar-alt"></i> Visualizar Eventos
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <div class="alert alert-info">
+                        Não há calendários ativos para o ano corrente.
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header bg-info text-white">
+                <h4 class="mb-0">Próximos Eventos</h4>
+            </div>
+            <div class="card-body p-0">
+                {% if eventos_proximos %}
+                    <ul class="list-group list-group-flush">
+                        {% for evento in eventos_proximos %}
+                            <li class="list-group-item">
+                                <h6 class="mb-1">{{ evento.titulo }}</h6>
+                                <p class="mb-1 text-muted">
+                                    <i class="far fa-calendar-alt"></i> {{ evento.datainicio.strftime('%d/%m/%Y') }}
+                                    {% if evento.datainicio != evento.datafim %}
+                                        a {{ evento.datafim.strftime('%d/%m/%Y') }}
+                                    {% endif %}
+                                </p>
+                                {% if evento.local %}
+                                    <small><i class="fas fa-map-marker-alt"></i> {{ evento.local }}</small>
+                                {% endif %}
+                            </li>
+                        {% endfor %}
+                    </ul>
+                {% else %}
+                    <div class="alert alert-info m-3">
+                        Não há eventos próximos agendados.
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

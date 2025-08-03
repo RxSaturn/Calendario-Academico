@@ -1,0 +1,53 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ titulo }}{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div class="card-header bg-primary text-white">
+        <h4 class="mb-0">{{ titulo }}</h4>
+    </div>
+    <div class="card-body">
+        <form method="POST" novalidate>
+            {{ form.hidden_tag() }}
+            
+            <div class="form-group">
+                {{ form.descricao.label(class="form-control-label") }}
+                {{ form.descricao(class="form-control" + (" is-invalid" if form.descricao.errors else "")) }}
+                {% if form.descricao.errors %}
+                    {% for error in form.descricao.errors %}
+                        <div class="invalid-feedback">{{ error }}</div>
+                    {% endfor %}
+                {% endif %}
+            </div>
+            
+            <div class="form-row">
+                <div class="form-group col-md-6">
+                    {{ form.datainicial.label(class="form-control-label") }}
+                    {{ form.datainicial(class="form-control" + (" is-invalid" if form.datainicial.errors else ""), type="date") }}
+                    {% if form.datainicial.errors %}
+                        {% for error in form.datainicial.errors %}
+                            <div class="invalid-feedback">{{ error }}</div>
+                        {% endfor %}
+                    {% endif %}
+                </div>
+                
+                <div class="form-group col-md-6">
+                    {{ form.datafinal.label(class="form-control-label") }}
+                    {{ form.datafinal(class="form-control" + (" is-invalid" if form.datafinal.errors else ""), type="date") }}
+                    {% if form.datafinal.errors %}
+                        {% for error in form.datafinal.errors %}
+                            <div class="invalid-feedback">{{ error }}</div>
+                        {% endfor %}
+                    {% endif %}
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <a href="{{ url_for('periodo.listar') }}" class="btn btn-secondary">Cancelar</a>
+                {{ form.submit(class="btn btn-primary") }}
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
