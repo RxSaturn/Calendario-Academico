@@ -1,0 +1,107 @@
+{% extends 'base.html' %}
+
+{% block title %}Calendários Acadêmicos{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2>Calendários Acadêmicos</h2>
+    <a href="{{ url_for('calendario.novo') }}" class="btn btn-primary">
+        <i class="fas fa-plus"></i> Novo Calendário
+    </a>
+</div>
+
+<div class="card">
+    <div class="card-body">
+        {% if calendarios %}
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead class="thead-light">
+                        <tr>
+                            <th>ID</th>
+                            <th>Nome</th>
+                            <th>Tipo</th>
+                            <th>Ano</th>
+                            <th>Período</th>
+                            <th>Status</th>
+                            <th>Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for calendario in calendarios %}
+                            <tr>
+                                <td>{{ calendario.id_calendario }}</td>
+                                <td>{{ calendario.nome }}</td>
+                                <td>{{ calendario.tipo_calendario.nome }}</td>
+                                <td>{{ calendario.ano }}</td>
+                                <td>{{ calendario.datainicio.strftime('%d/%m/%Y') }} a {{ calendario.datafim.strftime('%d/%m/%Y') }}</td>
+                                <td>
+                                    {% if calendario.ativo %}
+                                        <span class="badge badge-success">Ativo</span>
+                                    {% else %}
+                                        <span class="badge badge-secondary">Inativo</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <div class="btn-group btn-group-sm">
+                                        <a href="{{ url_for('calendario.visualizar', id=calendario.id_calendario) }}" class="btn btn-outline-info" title="Visualizar">
+                                            <i class="fas fa-eye"></i>
+                                        </a>
+                                        <a href="{{ url_for('evento.eventos_calendario', id=calendario.id_calendario) }}" class="btn btn-outline-success" title="Ver Eventos">
+                                            <i class="far fa-calendar-alt"></i>
+                                        </a>
+                                        <a href="{{ url_for('calendario.editar', id=calendario.id_calendario) }}" class="btn btn-outline-primary" title="Editar">
+                                            <i class="fas fa-edit"></i>
+                                        </a>
+                                        <button type="button" class="btn btn-outline-danger" 
+                                                onclick="confirmarExclusao('{{ calendario.id_calendario }}', '{{ calendario.nome }}')" title="Excluir">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <div class="alert alert-info">
+                Nenhum calendário cadastrado.
+            </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Modal de confirmação de exclusão -->
+<div class="modal fade" id="confirmarExclusaoModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Confirmar Exclusão</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <p>Deseja realmente excluir o calendário <strong id="calendarioNome"></strong>?</p>
+                <p class="text-danger">Esta ação não pode ser desfeita e excluirá todas as categorias e eventos associados.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
+                <form id="formExcluir" method="POST">
+                    <button type="submit" class="btn btn-danger">Excluir</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    function confirmarExclusao(id, nome) {
+        document.getElementById('calendarioNome').textContent = nome;
+        document.getElementById('formExcluir').action = "{{ url_for('calendario.excluir', id=0) }}".replace('0', id);
+        $('#confirmarExclusaoModal').modal('show');
+    }
+</script>
+{% endblock %}

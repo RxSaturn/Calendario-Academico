@@ -1,0 +1,106 @@
+{% extends 'base.html' %}
+
+{% block title %}Categorias de Calendário{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2>Categorias de Calendário</h2>
+    <a href="{{ url_for('categoria.novo') }}" class="btn btn-primary">
+        <i class="fas fa-plus"></i> Nova Categoria
+    </a>
+</div>
+
+<div class="card">
+    <div class="card-body">
+        {% if categorias %}
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead class="thead-light">
+                        <tr>
+                            <th>ID</th>
+                            <th>Nome</th>
+                            <th>Calendário</th>
+                            <th>Período</th>
+                            <th>Cor</th>
+                            <th>Total Dias</th>
+                            <th>Contagem</th>
+                            <th>Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for categoria in categorias %}
+                            <tr>
+                                <td>{{ categoria.id_categoria }}</td>
+                                <td>{{ categoria.nome }}</td>
+                                <td>{{ categoria.calendario.nome }}</td>
+                                <td>{{ categoria.periodo.descricao }}</td>
+                                <td>
+                                    <span class="d-inline-block" style="width: 25px; height: 25px; background-color: {{ categoria.corassociada }}; border: 1px solid #ddd; border-radius: 4px;"></span>
+                                    <small class="ml-1">{{ categoria.corassociada }}</small>
+                                </td>
+                                <td>{{ categoria.totaldias or 'N/A' }}</td>
+                                <td>
+                                    {% if categoria.habilitacaocontagem %}
+                                        <span class="badge badge-success">Habilitada</span>
+                                    {% else %}
+                                        <span class="badge badge-secondary">Desabilitada</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <div class="btn-group btn-group-sm">
+                                        <a href="{{ url_for('categoria.editar', id=categoria.id_categoria) }}" class="btn btn-outline-primary" title="Editar">
+                                            <i class="fas fa-edit"></i>
+                                        </a>
+                                        <button type="button" class="btn btn-outline-danger" 
+                                                onclick="confirmarExclusao('{{ categoria.id_categoria }}', '{{ categoria.nome }}')" title="Excluir">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <div class="alert alert-info">
+                Nenhuma categoria cadastrada.
+            </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Modal de confirmação de exclusão -->
+<div class="modal fade" id="confirmarExclusaoModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Confirmar Exclusão</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <p>Deseja realmente excluir a categoria <strong id="categoriaNome"></strong>?</p>
+                <p class="text-danger">Esta ação não pode ser desfeita e excluirá todos os eventos associados.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
+                <form id="formExcluir" method="POST">
+                    <button type="submit" class="btn btn-danger">Excluir</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    function confirmarExclusao(id, nome) {
+        document.getElementById('categoriaNome').textContent = nome;
+        document.getElementById('formExcluir').action = "{{ url_for('categoria.excluir', id=0) }}".replace('0', id);
+        $('#confirmarExclusaoModal').modal('show');
+    }
+</script>
+{% endblock %}

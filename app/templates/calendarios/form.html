@@ -1,0 +1,78 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ titulo }}{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div class="card-header bg-primary text-white">
+        <h4 class="mb-0">{{ titulo }}</h4>
+    </div>
+    <div class="card-body">
+        <form method="POST" novalidate>
+            {{ form.hidden_tag() }}
+            
+            <div class="form-group">
+                {{ form.id_tipo.label(class="form-control-label") }}
+                {{ form.id_tipo(class="form-control" + (" is-invalid" if form.id_tipo.errors else "")) }}
+                {% if form.id_tipo.errors %}
+                    {% for error in form.id_tipo.errors %}
+                        <div class="invalid-feedback">{{ error }}</div>
+                    {% endfor %}
+                {% endif %}
+            </div>
+            
+            <div class="form-group">
+                {{ form.nome.label(class="form-control-label") }}
+                {{ form.nome(class="form-control" + (" is-invalid" if form.nome.errors else "")) }}
+                {% if form.nome.errors %}
+                    {% for error in form.nome.errors %}
+                        <div class="invalid-feedback">{{ error }}</div>
+                    {% endfor %}
+                {% endif %}
+            </div>
+            
+            <div class="form-row">
+                <div class="form-group col-md-4">
+                    {{ form.ano.label(class="form-control-label") }}
+                    {{ form.ano(class="form-control" + (" is-invalid" if form.ano.errors else "")) }}
+                    {% if form.ano.errors %}
+                        {% for error in form.ano.errors %}
+                            <div class="invalid-feedback">{{ error }}</div>
+                        {% endfor %}
+                    {% endif %}
+                </div>
+                
+                <div class="form-group col-md-4">
+                    {{ form.datainicio.label(class="form-control-label") }}
+                    {{ form.datainicio(class="form-control" + (" is-invalid" if form.datainicio.errors else ""), type="date") }}
+                    {% if form.datainicio.errors %}
+                        {% for error in form.datainicio.errors %}
+                            <div class="invalid-feedback">{{ error }}</div>
+                        {% endfor %}
+                    {% endif %}
+                </div>
+                
+                <div class="form-group col-md-4">
+                    {{ form.datafim.label(class="form-control-label") }}
+                    {{ form.datafim(class="form-control" + (" is-invalid" if form.datafim.errors else ""), type="date") }}
+                    {% if form.datafim.errors %}
+                        {% for error in form.datafim.errors %}
+                            <div class="invalid-feedback">{{ error }}</div>
+                        {% endfor %}
+                    {% endif %}
+                </div>
+            </div>
+            
+            <div class="form-group form-check">
+                {{ form.ativo(class="form-check-input") }}
+                {{ form.ativo.label(class="form-check-label") }}
+            </div>
+            
+            <div class="form-group">
+                <a href="{{ url_for('calendario.listar') }}" class="btn btn-secondary">Cancelar</a>
+                {{ form.submit(class="btn btn-primary") }}
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

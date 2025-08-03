@@ -1,0 +1,40 @@
+{% extends 'base.html' %}
+
+{% block title %}Sobre o Sistema de Calendário Acadêmico{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div class="card-header bg-primary text-white">
+        <h2 class="mb-0">Sobre o Sistema</h2>
+    </div>
+    <div class="card-body">
+        <h4>Sistema de Calendário Acadêmico</h4>
+        <p class="lead">
+            Este sistema permite o gerenciamento completo de calendários acadêmicos, incluindo períodos, eventos, categorias e visualização de calendários.
+        </p>
+        
+        <h5 class="mt-4">Principais Funcionalidades</h5>
+        <ul>
+            <li>Gerenciamento de períodos acadêmicos</li>
+            <li>Criação e edição de calendários por ano e tipo</li>
+            <li>Categorização de eventos com cores personalizadas</li>
+            <li>Visualização interativa de calendários</li>
+            <li>Detecção de conflitos de eventos</li>
+            <li>Relatórios de calendários</li>
+        </ul>
+        
+        <h5 class="mt-4">Tecnologias Utilizadas</h5>
+        <ul>
+            <li>Backend: Python com Flask e SQLAlchemy</li>
+            <li>Frontend: HTML, CSS com Bootstrap</li>
+            <li>Banco de dados: SQLite/PostgreSQL</li>
+            <li>Visualização de calendário: FullCalendar.js</li>
+        </ul>
+        
+        <div class="mt-4 text-muted">
+            <p>Versão 1.0.0 - Desenvolvido para a disciplina de Banco de Dados I</p>
+            <p>© 2025 - Todos os direitos reservados</p>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,99 @@
+{% extends 'base.html' %}
+
+{% block title %}Eventos{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2>Eventos</h2>
+    <a href="{{ url_for('evento.novo') }}" class="btn btn-primary">
+        <i class="fas fa-plus"></i> Novo Evento
+    </a>
+</div>
+
+<div class="card">
+    <div class="card-body">
+        {% if eventos %}
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead class="thead-light">
+                        <tr>
+                            <th>ID</th>
+                            <th>Título</th>
+                            <th>Categoria</th>
+                            <th>Data Inicial</th>
+                            <th>Data Final</th>
+                            <th>Local</th>
+                            <th>Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for evento in eventos %}
+                            <tr>
+                                <td>{{ evento.id_evento }}</td>
+                                <td>{{ evento.titulo }}</td>
+                                <td>
+                                    <span class="badge" style="background-color: {{ evento.categoria.corassociada }}; color: white;">
+                                        {{ evento.categoria.nome }}
+                                    </span>
+                                </td>
+                                <td>{{ evento.datainicio.strftime('%d/%m/%Y') }}</td>
+                                <td>{{ evento.datafim.strftime('%d/%m/%Y') }}</td>
+                                <td>{{ evento.local or 'N/A' }}</td>
+                                <td>
+                                    <div class="btn-group btn-group-sm">
+                                        <a href="{{ url_for('evento.editar', id=evento.id_evento) }}" class="btn btn-outline-primary" title="Editar">
+                                            <i class="fas fa-edit"></i>
+                                        </a>
+                                        <button type="button" class="btn btn-outline-danger" 
+                                                onclick="confirmarExclusao('{{ evento.id_evento }}', '{{ evento.titulo }}')" title="Excluir">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <div class="alert alert-info">
+                Nenhum evento cadastrado.
+            </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Modal de confirmação de exclusão -->
+<div class="modal fade" id="confirmarExclusaoModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Confirmar Exclusão</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <p>Deseja realmente excluir o evento <strong id="eventoNome"></strong>?</p>
+                <p class="text-danger">Esta ação não pode ser desfeita.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
+                <form id="formExcluir" method="POST">
+                    <button type="submit" class="btn btn-danger">Excluir</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    function confirmarExclusao(id, nome) {
+        document.getElementById('eventoNome').textContent = nome;
+        document.getElementById('formExcluir').action = "{{ url_for('evento.excluir', id=0) }}".replace('0', id);
+        $('#confirmarExclusaoModal').modal('show');
+    }
+</script>
+{% endblock %}

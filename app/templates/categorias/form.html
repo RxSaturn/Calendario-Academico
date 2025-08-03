@@ -1,0 +1,109 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ titulo }}{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div class="card-header bg-primary text-white">
+        <h4 class="mb-0">{{ titulo }}</h4>
+    </div>
+    <div class="card-body">
+        <form method="POST" novalidate>
+            {{ form.hidden_tag() }}
+            
+            <div class="form-row">
+                <div class="form-group col-md-6">
+                    {{ form.id_calendario.label(class="form-control-label") }}
+                    {{ form.id_calendario(class="form-control" + (" is-invalid" if form.id_calendario.errors else "")) }}
+                    {% if form.id_calendario.errors %}
+                        {% for error in form.id_calendario.errors %}
+                            <div class="invalid-feedback">{{ error }}</div>
+                        {% endfor %}
+                    {% endif %}
+                </div>
+                
+                <div class="form-group col-md-6">
+                    {{ form.id_periodo.label(class="form-control-label") }}
+                    {{ form.id_periodo(class="form-control" + (" is-invalid" if form.id_periodo.errors else "")) }}
+                    {% if form.id_periodo.errors %}
+                        {% for error in form.id_periodo.errors %}
+                            <div class="invalid-feedback">{{ error }}</div>
+                        {% endfor %}
+                    {% endif %}
+                </div>
+            </div>
+            
+            <div class="form-group">
+                {{ form.nome.label(class="form-control-label") }}
+                {{ form.nome(class="form-control" + (" is-invalid" if form.nome.errors else "")) }}
+                {% if form.nome.errors %}
+                    {% for error in form.nome.errors %}
+                        <div class="invalid-feedback">{{ error }}</div>
+                    {% endfor %}
+                {% endif %}
+            </div>
+            
+            <div class="form-group">
+                {{ form.corassociada.label(class="form-control-label") }}
+                <div class="input-group">
+                    {{ form.corassociada(class="form-control" + (" is-invalid" if form.corassociada.errors else ""), type="color") }}
+                    <div class="input-group-append">
+                        <span class="input-group-text" id="corDisplay">{{ form.corassociada.data or '#3788d8' }}</span>
+                    </div>
+                </div>
+                {% if form.corassociada.errors %}
+                    {% for error in form.corassociada.errors %}
+                        <div class="invalid-feedback">{{ error }}</div>
+                    {% endfor %}
+                {% endif %}
+            </div>
+            
+            <div class="form-row">
+                <div class="form-group col-md-6">
+                    {{ form.totaldias.label(class="form-control-label") }}
+                    {{ form.totaldias(class="form-control" + (" is-invalid" if form.totaldias.errors else "")) }}
+                    {% if form.totaldias.errors %}
+                        {% for error in form.totaldias.errors %}
+                            <div class="invalid-feedback">{{ error }}</div>
+                        {% endfor %}
+                    {% endif %}
+                </div>
+                
+                <div class="form-group col-md-6">
+                    {{ form.diassemanasvalidos.label(class="form-control-label") }}
+                    {{ form.diassemanasvalidos(class="form-control" + (" is-invalid" if form.diassemanasvalidos.errors else ""), placeholder="Ex: 12345 para Seg-Sex") }}
+                    {% if form.diassemanasvalidos.errors %}
+                        {% for error in form.diassemanasvalidos.errors %}
+                            <div class="invalid-feedback">{{ error }}</div>
+                        {% endfor %}
+                    {% endif %}
+                    <small class="form-text text-muted">1=Segunda, 2=Terça, 3=Quarta, 4=Quinta, 5=Sexta, 6=Sábado, 7=Domingo</small>
+                </div>
+            </div>
+            
+            <div class="form-group form-check">
+                {{ form.habilitacaocontagem(class="form-check-input") }}
+                {{ form.habilitacaocontagem.label(class="form-check-label") }}
+            </div>
+            
+            <div class="form-group">
+                <a href="{{ url_for('categoria.listar') }}" class="btn btn-secondary">Cancelar</a>
+                {{ form.submit(class="btn btn-primary") }}
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const corInput = document.querySelector('input[type="color"]');
+        const corDisplay = document.getElementById('corDisplay');
+        
+        corInput.addEventListener('input', function() {
+            corDisplay.textContent = this.value;
+        });
+    });
+</script>
+{% endblock %}
