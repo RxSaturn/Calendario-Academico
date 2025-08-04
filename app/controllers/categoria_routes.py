@@ -17,6 +17,16 @@ def novo():
     form.id_periodo.choices = [(p.id_periodo, p.descricao) for p in Periodo.query.all()]
     
     if form.validate_on_submit():
+        # Verificar cores duplicadas no mesmo calendário
+        cor_existente = CategoriaCalendario.query.filter_by(
+            id_calendario=form.id_calendario.data,
+            corassociada=form.corassociada.data
+        ).first()
+        
+        if cor_existente:
+            flash(f'A cor {form.corassociada.data} já está sendo usada em outra categoria deste calendário.', 'danger')
+            return render_template('categorias/form.html', form=form, titulo='Nova Categoria')
+        
         categoria = CategoriaCalendario(
             id_calendario=form.id_calendario.data,
             id_periodo=form.id_periodo.data,
@@ -42,6 +52,16 @@ def editar(id):
     form.id_periodo.choices = [(p.id_periodo, p.descricao) for p in Periodo.query.all()]
     
     if form.validate_on_submit():
+        # Verificar cores duplicadas no mesmo calendário
+        cor_existente = CategoriaCalendario.query.filter_by(
+            id_calendario=form.id_calendario.data,
+            corassociada=form.corassociada.data
+        ).filter(CategoriaCalendario.id_categoria != id).first()
+        
+        if cor_existente:
+            flash(f'A cor {form.corassociada.data} já está sendo usada em outra categoria deste calendário.', 'danger')
+            return render_template('categorias/form.html', form=form, titulo='Editar Categoria')
+        
         form.populate_obj(categoria)
         db.session.commit()
         flash('Categoria atualizada com sucesso!', 'success')

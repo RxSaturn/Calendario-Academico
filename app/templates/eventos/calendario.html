@@ -9,18 +9,31 @@
         height: 700px;
         margin-bottom: 1rem;
     }
-    
+
     .evento-tooltip {
         max-width: 300px;
         padding: 10px;
         background: white;
         border: 1px solid #ccc;
         border-radius: 5px;
-        box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
     }
-    
+
     .fc-event {
         cursor: pointer;
+    }
+
+    .legenda-item {
+        display: flex;
+        align-items: center;
+        margin-bottom: 5px;
+    }
+
+    .legenda-cor {
+        width: 20px;
+        height: 20px;
+        border-radius: 3px;
+        margin-right: 8px;
     }
 </style>
 {% endblock %}
@@ -28,14 +41,73 @@
 {% block content %}
 <div class="d-flex justify-content-between align-items-center mb-4">
     <h2>{{ calendario.nome }} ({{ calendario.ano }})</h2>
-    <a href="{{ url_for('calendario.listar') }}" class="btn btn-secondary">
-        <i class="fas fa-arrow-left"></i> Voltar
-    </a>
+    <div>
+        <a href="{{ url_for('evento.relatorio_calendario', id=calendario.id_calendario) }}" class="btn btn-info mr-2">
+            <i class="fas fa-file-alt"></i> Relatório Detalhado
+        </a>
+        <a href="{{ url_for('calendario.listar') }}" class="btn btn-secondary">
+            <i class="fas fa-arrow-left"></i> Voltar
+        </a>
+    </div>
 </div>
 
-<div class="card">
-    <div class="card-body">
-        <div id="calendario"></div>
+<div class="row">
+    <div class="col-md-9">
+        <div class="card mb-4">
+            <div class="card-body">
+                <div id="calendario"></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-3">
+        <div class="card mb-4">
+            <div class="card-header bg-info text-white">
+                <h5 class="mb-0">Legenda</h5>
+            </div>
+            <div class="card-body">
+                {% set categorias_dict = {} %}
+                {% for evento in eventos %}
+                {% if evento.color not in categorias_dict %}
+                {% set _ = categorias_dict.update({evento.color: evento.category_name}) %}
+                {% endif %}
+                {% endfor %}
+
+                {% for cor, nome in categorias_dict.items() %}
+                <div class="legenda-item">
+                    <div class="legenda-cor" style="background-color: {{ cor }};"></div>
+                    <span>{{ nome }}</span>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-header bg-success text-white">
+                <h5 class="mb-0">Estatísticas</h5>
+            </div>
+            <div class="card-body">
+                <p><strong>Total de Eventos:</strong> {{ eventos|length }}</p>
+
+                {% for categoria in calendario.categorias %}
+                {% if categoria.habilitacaocontagem %}
+                <div class="mb-2">
+                    <strong>{{ categoria.nome }}:</strong>
+                    <div class="progress mt-1">
+                        {% set porcentagem = (categoria.eventos|length / categoria.totaldias * 100) if
+                        categoria.totaldias else 100 %}
+                        <div class="progress-bar" role="progressbar"
+                            style="width: {{ porcentagem }}%; background-color: {{ categoria.corassociada }};"
+                            aria-valuenow="{{ categoria.eventos|length }}" aria-valuemin="0"
+                            aria-valuemax="{{ categoria.totaldias }}">
+                            {{ categoria.eventos|length }}/{{ categoria.totaldias }}
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+                {% endfor %}
+            </div>
+        </div>
     </div>
 </div>
 
@@ -53,8 +125,10 @@
                 <p><strong>Data:</strong> <span id="eventoDatas"></span></p>
                 <p id="eventoDescricaoContainer"><strong>Descrição:</strong> <span id="eventoDescricao"></span></p>
                 <p id="eventoLocalContainer"><strong>Local:</strong> <span id="eventoLocal"></span></p>
+                <p><strong>Categoria:</strong> <span id="eventoCategoria"></span></p>
             </div>
             <div class="modal-footer">
+                <a href="#" id="eventoEditarLink" class="btn btn-primary">Editar</a>
                 <button type="button" class="btn btn-secondary" data-dismiss="modal">Fechar</button>
             </div>
         </div>
@@ -66,9 +140,9 @@
 <script src="https://cdn.jsdelivr.net/npm/fullcalendar@5.10.1/main.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/fullcalendar@5.10.1/locales/pt-br.js"></script>
 <script>
-    document.addEventListener('DOMContentLoaded', function() {
+    document.addEventListener('DOMContentLoaded', function () {
         var calendarEl = document.getElementById('calendario');
-        
+
         var calendar = new FullCalendar.Calendar(calendarEl, {
             locale: 'pt-br',
             headerToolbar: {
@@ -77,54 +151,60 @@
                 right: 'dayGridMonth,timeGridWeek,listMonth'
             },
             initialView: 'dayGridMonth',
-            events: {{ eventos|tojson|safe }},
-            eventClick: function(info) {
-                document.getElementById('eventoTitulo').textContent = info.event.title;
-                
-                let dataInicio = new Date(info.event.start);
-                let dataFim = info.event.end ? new Date(info.event.end) : dataInicio;
-                
-                // Formatação das datas
-                let formatoData = { day: 'numeric', month: 'numeric', year: 'numeric' };
-                let dataTexto;
-                
-                if (dataInicio.toDateString() === dataFim.toDateString()) {
-                    dataTexto = dataInicio.toLocaleDateString('pt-BR', formatoData);
-                } else {
-                    dataTexto = dataInicio.toLocaleDateString('pt-BR', formatoData) + 
-                                ' a ' + 
-                                dataFim.toLocaleDateString('pt-BR', formatoData);
-                }
-                
-                document.getElementById('eventoDatas').textContent = dataTexto;
-                
-                // Descrição
-                const descricaoContainer = document.getElementById('eventoDescricaoContainer');
-                const descricaoElement = document.getElementById('eventoDescricao');
-                
-                if (info.event.extendedProps.description) {
-                    descricaoElement.textContent = info.event.extendedProps.description;
-                    descricaoContainer.style.display = 'block';
-                } else {
-                    descricaoContainer.style.display = 'none';
-                }
-                
-                // Local
-                const localContainer = document.getElementById('eventoLocalContainer');
-                const localElement = document.getElementById('eventoLocal');
-                
-                if (info.event.extendedProps.location) {
-                    localElement.textContent = info.event.extendedProps.location;
-                    localContainer.style.display = 'block';
-                } else {
-                    localContainer.style.display = 'none';
-                }
-                
-                $('#eventoModal').modal('show');
+            events: {{ eventos| tojson | safe }},
+        eventClick: function (info) {
+            document.getElementById('eventoTitulo').textContent = info.event.title;
+
+            let dataInicio = new Date(info.event.start);
+            let dataFim = info.event.end ? new Date(info.event.end) : dataInicio;
+
+            // Formatação das datas
+            let formatoData = { day: 'numeric', month: 'numeric', year: 'numeric' };
+            let dataTexto;
+
+            if (dataInicio.toDateString() === dataFim.toDateString()) {
+                dataTexto = dataInicio.toLocaleDateString('pt-BR', formatoData);
+            } else {
+                dataTexto = dataInicio.toLocaleDateString('pt-BR', formatoData) +
+                    ' a ' +
+                    dataFim.toLocaleDateString('pt-BR', formatoData);
             }
+
+            document.getElementById('eventoDatas').textContent = dataTexto;
+
+            // Descrição
+            const descricaoContainer = document.getElementById('eventoDescricaoContainer');
+            const descricaoElement = document.getElementById('eventoDescricao');
+
+            if (info.event.extendedProps.description) {
+                descricaoElement.textContent = info.event.extendedProps.description;
+                descricaoContainer.style.display = 'block';
+            } else {
+                descricaoContainer.style.display = 'none';
+            }
+
+            // Local
+            const localContainer = document.getElementById('eventoLocalContainer');
+            const localElement = document.getElementById('eventoLocal');
+
+            if (info.event.extendedProps.location) {
+                localElement.textContent = info.event.extendedProps.location;
+                localContainer.style.display = 'block';
+            } else {
+                localContainer.style.display = 'none';
+            }
+
+            // Categoria
+            document.getElementById('eventoCategoria').textContent = info.event.extendedProps.category_name;
+
+            // Link de edição
+            document.getElementById('eventoEditarLink').href = "/eventos/editar/" + info.event.id;
+
+            $('#eventoModal').modal('show');
+        }
         });
-        
-        calendar.render();
+
+    calendar.render();
     });
 </script>
 {% endblock %}

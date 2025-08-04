@@ -1,4 +1,5 @@
 from datetime import datetime
+import calendar
 from app import db
 
 class Periodo(db.Model):
@@ -62,6 +63,43 @@ class CategoriaCalendario(db.Model):
     
     def __repr__(self):
         return f'<CategoriaCalendario {self.nome}>'
+    
+    def calcular_dias_validos(self, inicio, fim):
+        """Calcula os dias válidos entre as datas, considerando apenas os dias da semana permitidos"""
+        dias_validos = 0
+        dias_semana_permitidos = [int(d) for d in self.diassemanasvalidos] if self.diassemanasvalidos else []
+        
+        # Ajuste para formato de dia da semana do Python (0=Segunda, 6=Domingo)
+        dias_ajustados = [(d % 7) for d in dias_semana_permitidos]
+        
+        data_atual = inicio
+        while data_atual <= fim:
+            # Na semana do Python, 0 é segunda-feira e 6 é domingo
+            dia_semana = data_atual.weekday()
+            if dia_semana in dias_ajustados:
+                dias_validos += 1
+            data_atual += timedelta(days=1)
+            
+        return dias_validos
+    
+    def atualizar_contagem_dias(self):
+        """Atualiza a contagem total de dias com base nos eventos associados"""
+        if not self.habilitacaocontagem:
+            return 0
+            
+        total_dias = 0
+        dias_contados = set()  # Para evitar contar o mesmo dia duas vezes
+        
+        for evento in self.eventos:
+            data_atual = evento.datainicio
+            while data_atual <= evento.datafim:
+                # Verificar se o dia da semana é válido
+                if self.diassemanasvalidos and str(data_atual.isoweekday()) in self.diassemanasvalidos:
+                    dias_contados.add(data_atual.strftime('%Y-%m-%d'))
+                data_atual += timedelta(days=1)
+                
+        total_dias = len(dias_contados)
+        return total_dias
 
 class Eventos(db.Model):
     __tablename__ = 'eventos'

@@ -1,0 +1,68 @@
+{% extends 'base.html' %}
+
+{% block title %}Copiar Calendário{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div class="card-header bg-primary text-white">
+        <h4 class="mb-0">Copiar Calendário</h4>
+    </div>
+    <div class="card-body">
+        <div class="row mb-4">
+            <div class="col-md-12">
+                <h5>Calendário Original</h5>
+                <table class="table table-bordered table-sm">
+                    <tr>
+                        <th class="table-secondary" width="20%">Nome:</th>
+                        <td>{{ calendario.nome }}</td>
+                    </tr>
+                    <tr>
+                        <th class="table-secondary">Tipo:</th>
+                        <td>{{ calendario.tipo_calendario.nome }} ({{ calendario.tipo_calendario.sigla }})</td>
+                    </tr>
+                    <tr>
+                        <th class="table-secondary">Ano:</th>
+                        <td>{{ calendario.ano }}</td>
+                    </tr>
+                    <tr>
+                        <th class="table-secondary">Período:</th>
+                        <td>{{ calendario.datainicio.strftime('%d/%m/%Y') }} a {{ calendario.datafim.strftime('%d/%m/%Y') }}</td>
+                    </tr>
+                    <tr>
+                        <th class="table-secondary">Categorias:</th>
+                        <td>{{ calendario.categorias|length }}</td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+
+        <form method="POST" novalidate>
+            <div class="form-group">
+                <label for="novo_nome">Novo Nome</label>
+                <input type="text" class="form-control" id="novo_nome" name="novo_nome" value="{{ calendario.nome }}" required>
+                <small class="form-text text-muted">Você pode manter o mesmo nome ou alterá-lo.</small>
+            </div>
+            
+            <div class="form-group">
+                <label for="novo_ano">Novo Ano</label>
+                <input type="number" class="form-control" id="novo_ano" name="novo_ano" value="{{ calendario.ano + 1 }}" min="2000" required>
+            </div>
+            
+            <div class="alert alert-info">
+                <i class="fas fa-info-circle"></i> A cópia irá:
+                <ul>
+                    <li>Criar um novo calendário para o ano selecionado</li>
+                    <li>Copiar todas as categorias associadas</li>
+                    <li>Manter as mesmas configurações (cores, dias válidos, etc.)</li>
+                    <li><strong>Não copiará</strong> os eventos existentes</li>
+                </ul>
+            </div>
+            
+            <div class="form-group">
+                <a href="{{ url_for('calendario.visualizar', id=calendario.id_calendario) }}" class="btn btn-secondary">Cancelar</a>
+                <button type="submit" class="btn btn-primary">Copiar Calendário</button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

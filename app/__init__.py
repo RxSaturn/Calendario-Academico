@@ -24,11 +24,13 @@ def create_app(config_class=Config):
     from app.controllers.calendario_routes import calendario_bp
     from app.controllers.categoria_routes import categoria_bp
     from app.controllers.evento_routes import evento_bp
+    from app.controllers.tipo_calendario_routes import tipo_calendario_bp
 
     app.register_blueprint(main)
     app.register_blueprint(periodo_bp)
     app.register_blueprint(calendario_bp)
     app.register_blueprint(categoria_bp)
     app.register_blueprint(evento_bp)
+    app.register_blueprint(tipo_calendario_bp)
 
     return app

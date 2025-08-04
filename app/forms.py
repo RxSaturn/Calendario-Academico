@@ -9,7 +9,7 @@ class PeriodoForm(FlaskForm):
     submit = SubmitField('Salvar')
 
 class TipoCalendarioForm(FlaskForm):
-    sigla = StringField('Sigla', validators=[DataRequired(), Length(max=4)])
+    sigla = StringField('Sigla', validators=[DataRequired(), Length(min=2, max=4)])
     nome = StringField('Nome', validators=[DataRequired(), Length(max=30)])
     submit = SubmitField('Salvar')
 
