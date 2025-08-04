@@ -70,6 +70,27 @@ def editar(id):
                                 for c in CategoriaCalendario.query.all()]
     
     if form.validate_on_submit():
+        # Buscar a categoria e o calendário associado
+        categoria = CategoriaCalendario.query.get(form.id_categoria.data)
+        calendario = categoria.calendario
+        
+        # Verificar se as datas do evento estão dentro do período do calendário
+        if form.datainicio.data < calendario.datainicio or form.datafim.data > calendario.datafim:
+            flash('As datas do evento devem estar dentro do período do calendário.', 'danger')
+            return render_template('eventos/form.html', form=form, titulo='Editar Evento')
+        
+        # Verificar se as datas estão dentro do período da categoria
+        periodo = categoria.periodo
+        if form.datainicio.data < periodo.datainicial or form.datafim.data > periodo.datafinal:
+            flash('As datas do evento devem estar dentro do período da categoria.', 'warning')
+            # Não bloqueia, apenas avisa
+        
+        # Guardar a categoria antiga se foi alterada
+        categoria_antiga = None
+        if evento.id_categoria != form.id_categoria.data:
+            categoria_antiga = evento.categoria
+        
+        # Atualizar os dados do evento
         form.populate_obj(evento)
         
         # Verificar conflitos de eventos
@@ -78,6 +99,17 @@ def editar(id):
             flash(f'Atenção! Existem {len(conflitos)} eventos conflitantes no mesmo período.', 'warning')
         
         db.session.commit()
+        
+        # Se a categoria tem habilitação de contagem, atualizar o total de dias
+        if categoria.habilitacaocontagem:
+            dias_validos = categoria.atualizar_contagem_dias()
+            if categoria.totaldias and dias_validos > categoria.totaldias:
+                flash(f'Atenção! A categoria agora tem {dias_validos} dias registrados, ultrapassando o limite de {categoria.totaldias} dias.', 'warning')
+        
+        # Se a categoria foi alterada, atualizar a contagem na categoria antiga também
+        if categoria_antiga and categoria_antiga.habilitacaocontagem:
+            categoria_antiga.atualizar_contagem_dias()
+        
         flash('Evento atualizado com sucesso!', 'success')
         return redirect(url_for('evento.listar'))
         
@@ -104,15 +136,19 @@ def eventos_calendario(id):
     # Formatar eventos para o fullCalendar
     eventos_formatados = []
     for evento in eventos:
+        # Obtém o objeto categoria associado ao evento
+        categoria_evento = CategoriaCalendario.query.get(evento.id_categoria)
+        
         eventos_formatados.append({
             'id': evento.id_evento,
             'title': evento.titulo,
             'start': evento.datainicio.isoformat(),
             'end': evento.datafim.isoformat(),
             'allDay': evento.dia_todo,
-            'color': evento.categoria.corassociada,
+            'color': categoria_evento.corassociada,
             'description': evento.descricao or '',
-            'location': evento.local or ''
+            'location': evento.local or '',
+            'categoria_nome': categoria_evento.nome  # Adiciona o nome da categoria para uso no modal
         })
     
     if request.headers.get('X-Requested-With') == 'XMLHttpRequest':

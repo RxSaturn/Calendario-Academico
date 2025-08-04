@@ -26,7 +26,7 @@
     .legenda-item {
         display: flex;
         align-items: center;
-        margin-bottom: 5px;
+        margin-bottom: 10px;
     }
 
     .legenda-cor {
@@ -34,6 +34,21 @@
         height: 20px;
         border-radius: 3px;
         margin-right: 8px;
+        flex-shrink: 0;
+    }
+
+    /* Melhorias na barra de progresso */
+    .progress {
+        height: 25px;
+        margin-bottom: 15px;
+    }
+
+    .progress-bar {
+        font-size: 14px;
+        line-height: 25px;
+        font-weight: bold;
+        text-shadow: 1px 1px 1px rgba(0, 0, 0, 0.3);
+        padding: 0 5px;
     }
 </style>
 {% endblock %}
@@ -66,17 +81,11 @@
                 <h5 class="mb-0">Legenda</h5>
             </div>
             <div class="card-body">
-                {% set categorias_dict = {} %}
-                {% for evento in eventos %}
-                {% if evento.color not in categorias_dict %}
-                {% set _ = categorias_dict.update({evento.color: evento.category_name}) %}
-                {% endif %}
-                {% endfor %}
-
-                {% for cor, nome in categorias_dict.items() %}
+                <!-- Obtém as categorias diretamente das categorias do calendário -->
+                {% for categoria in calendario.categorias %}
                 <div class="legenda-item">
-                    <div class="legenda-cor" style="background-color: {{ cor }};"></div>
-                    <span>{{ nome }}</span>
+                    <div class="legenda-cor" style="background-color: {{ categoria.corassociada }};"></div>
+                    <span>{{ categoria.nome }}</span>
                 </div>
                 {% endfor %}
             </div>
@@ -91,24 +100,25 @@
 
                 {% for categoria in calendario.categorias %}
                 {% if categoria.habilitacaocontagem %}
-                <div class="mb-2">
+                <div class="mb-3">
                     <strong>{{ categoria.nome }}:</strong>
-                    <div class="progress mt-1">
-                        {% set porcentagem = (categoria.eventos|length / categoria.totaldias * 100) if
-                        categoria.totaldias else 100 %}
-                        <div class="progress-bar" role="progressbar"
-                            style="width: {{ porcentagem }}%; background-color: {{ categoria.corassociada }};"
-                            aria-valuenow="{{ categoria.eventos|length }}" aria-valuemin="0"
-                            aria-valuemax="{{ categoria.totaldias }}">
-                            {{ categoria.eventos|length }}/{{ categoria.totaldias }}
-                        </div>
+                    <div class="progress mt-2">
+                        {% set qtd_eventos = categoria.eventos|length %}
+                        {% set total_dias = categoria.totaldias or 1 %}
+                        {% set porcentagem = (qtd_eventos / total_dias * 100)|round|int %}
+                        {% set porcentagem_display = porcentagem if porcentagem <= 100 else 100 %} <div
+                            class="progress-bar" role="progressbar"
+                            style="width: {{ porcentagem_display }}%; background-color: {{ categoria.corassociada }};"
+                            aria-valuenow="{{ qtd_eventos }}" aria-valuemin="0" aria-valuemax="{{ total_dias }}">
+                            {{ qtd_eventos }}/{{ total_dias }}
                     </div>
                 </div>
-                {% endif %}
-                {% endfor %}
             </div>
+            {% endif %}
+            {% endfor %}
         </div>
     </div>
+</div>
 </div>
 
 <!-- Modal de detalhes do evento -->
@@ -194,8 +204,9 @@
                 localContainer.style.display = 'none';
             }
 
-            // Categoria
-            document.getElementById('eventoCategoria').textContent = info.event.extendedProps.category_name;
+            // Categoria - Busca a categoria pelo ID e exibe seu nome
+            const categoria = info.event.extendedProps.categoria_nome || "Não definida";
+            document.getElementById('eventoCategoria').textContent = categoria;
 
             // Link de edição
             document.getElementById('eventoEditarLink').href = "/eventos/editar/" + info.event.id;

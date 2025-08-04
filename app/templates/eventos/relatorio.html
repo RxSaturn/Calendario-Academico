@@ -2,10 +2,54 @@
 
 {% block title %}Relatório Detalhado - {{ calendario.nome }}{% endblock %}
 
+{% block styles %}
+<style>
+    /* Estilos para impressão */
+    @media print {
+
+        .btn,
+        nav,
+        footer,
+        .no-print {
+            display: none !important;
+        }
+
+        .card {
+            border: 1px solid #ddd !important;
+            break-inside: avoid;
+            margin-bottom: 20px !important;
+        }
+
+        .card-header {
+            background-color: #f5f5f5 !important;
+            color: #333 !important;
+            padding: 10px !important;
+        }
+
+        body {
+            padding: 0;
+            margin: 0;
+            font-size: 12pt;
+        }
+
+        .container {
+            width: 100% !important;
+            max-width: none !important;
+        }
+    }
+
+    /* Melhora espaçamento na visualização normal */
+    .categoria-info {
+        margin-bottom: 15px;
+        font-size: 1.1em;
+    }
+</style>
+{% endblock %}
+
 {% block content %}
 <div class="d-flex justify-content-between align-items-center mb-4">
     <h2>Relatório Detalhado - {{ calendario.nome }} ({{ calendario.ano }})</h2>
-    <div>
+    <div class="no-print">
         <button onclick="window.print()" class="btn btn-outline-primary mr-2">
             <i class="fas fa-print"></i> Imprimir
         </button>
@@ -41,7 +85,8 @@
                 <table class="table table-striped">
                     <tr>
                         <th>Período:</th>
-                        <td>{{ calendario.datainicio.strftime('%d/%m/%Y') }} a {{ calendario.datafim.strftime('%d/%m/%Y') }}</td>
+                        <td>{{ calendario.datainicio.strftime('%d/%m/%Y') }} a {{
+                            calendario.datafim.strftime('%d/%m/%Y') }}</td>
                     </tr>
                     <tr>
                         <th>Total de Categorias:</th>
@@ -49,7 +94,8 @@
                     </tr>
                     <tr>
                         <th>Status:</th>
-                        <td>{% if calendario.ativo %}<span class="badge badge-success">Ativo</span>{% else %}<span class="badge badge-secondary">Inativo</span>{% endif %}</td>
+                        <td>{% if calendario.ativo %}<span class="badge badge-success">Ativo</span>{% else %}<span
+                                class="badge badge-secondary">Inativo</span>{% endif %}</td>
                     </tr>
                 </table>
             </div>
@@ -63,83 +109,64 @@
         <div class="d-flex justify-content-between align-items-center">
             <h4 class="mb-0">{{ dados.categoria.nome }}</h4>
             {% if dados.categoria.habilitacaocontagem %}
-                <span class="badge badge-light">
-                    {% if dados.categoria.totaldias %}
-                        {{ dados.dias_validos }}/{{ dados.categoria.totaldias }} dias
-                    {% else %}
-                        {{ dados.dias_validos }} dias
-                    {% endif %}
-                </span>
+            <span class="badge badge-light">
+                {% if dados.categoria.totaldias %}
+                {{ dados.dias_validos }}/{{ dados.categoria.totaldias }} dias
+                {% else %}
+                {{ dados.dias_validos }} dias
+                {% endif %}
+            </span>
             {% endif %}
         </div>
     </div>
     <div class="card-body">
-        <div class="mb-3">
+        <div class="categoria-info">
             <strong>Período:</strong> {{ dados.categoria.periodo.descricao }}<br>
-            <strong>Dias Válidos:</strong> 
+            <strong>Dias Válidos:</strong>
             {% if dados.categoria.diassemanasvalidos %}
-                {% set dias = {'1': 'Segunda', '2': 'Terça', '3': 'Quarta', '4': 'Quinta', '5': 'Sexta', '6': 'Sábado', '7': 'Domingo'} %}
-                {% for dia in dados.categoria.diassemanasvalidos %}
-                    {{ dias[dia] }}{% if not loop.last %}, {% endif %}
-                {% endfor %}
+            {% set dias = {'1': 'Segunda', '2': 'Terça', '3': 'Quarta', '4': 'Quinta', '5': 'Sexta', '6': 'Sábado', '7':
+            'Domingo'} %}
+            {% for dia in dados.categoria.diassemanasvalidos %}
+            {{ dias[dia] }}{% if not loop.last %}, {% endif %}
+            {% endfor %}
             {% else %}
-                Todos os dias
+            Todos os dias
             {% endif %}
         </div>
-        
+
         {% if dados.eventos %}
-            <h5>Eventos ({{ dados.eventos|length }})</h5>
-            <div class="table-responsive">
-                <table class="table table-sm table-hover">
-                    <thead class="thead-light">
-                        <tr>
-                            <th>Data Início</th>
-                            <th>Data Fim</th>
-                            <th>Título</th>
-                            <th>Local</th>
-                            <th>Dia Todo</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for evento in dados.eventos %}
-                            <tr>
-                                <td>{{ evento.datainicio.strftime('%d/%m/%Y') }}</td>
-                                <td>{{ evento.datafim.strftime('%d/%m/%Y') }}</td>
-                                <td>{{ evento.titulo }}</td>
-                                <td>{{ evento.local or '-' }}</td>
-                                <td>{% if evento.dia_todo %}<i class="fas fa-check text-success"></i>{% else %}<i class="fas fa-times text-muted"></i>{% endif %}</td>
-                            </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-            </div>
+        <h5>Eventos ({{ dados.eventos|length }})</h5>
+        <div class="table-responsive">
+            <table class="table table-sm table-hover">
+                <thead class="thead-light">
+                    <tr>
+                        <th>Data Início</th>
+                        <th>Data Fim</th>
+                        <th>Título</th>
+                        <th>Local</th>
+                        <th>Dia Todo</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for evento in dados.eventos %}
+                    <tr>
+                        <td>{{ evento.datainicio.strftime('%d/%m/%Y') }}</td>
+                        <td>{{ evento.datafim.strftime('%d/%m/%Y') }}</td>
+                        <td>{{ evento.titulo }}</td>
+                        <td>{{ evento.local or '-' }}</td>
+                        <td>{% if evento.dia_todo %}<i class="fas fa-check text-success"></i>{% else %}<i
+                                class="fas fa-times text-muted"></i>{% endif %}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
         {% else %}
-            <div class="alert alert-info">
-                Nenhum evento cadastrado para esta categoria.
-            </div>
+        <div class="alert alert-info">
+            Nenhum evento cadastrado para esta categoria.
+        </div>
         {% endif %}
     </div>
 </div>
 {% endfor %}
-
-<style media="print">
-    .btn, nav, footer {
-        display: none !important;
-    }
-    
-    .card {
-        border: 1px solid #ddd !important;
-        break-inside: avoid;
-    }
-    
-    .card-header {
-        background-color: #f5f5f5 !important;
-        color: #333 !important;
-    }
-    
-    body {
-        padding: 0;
-        margin: 0;
-    }
-</style>
 {% endblock %}
