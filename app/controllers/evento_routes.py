@@ -139,7 +139,7 @@ def eventos_calendario(id):
     
     # Formatar eventos para o fullCalendar respeitando dias válidos
     eventos_formatados = []
-    contagem_dias_por_categoria = {}
+    contagem_dias_por_categoria = {}  # Agora vamos usar o ID da categoria como chave
     
     for evento in eventos:
         categoria = categorias_dict.get(evento.id_categoria)
@@ -154,9 +154,9 @@ def eventos_calendario(id):
             # Criar eventos individuais para cada dia válido
             data_atual = evento.datainicio
             
-            # Contador para essa categoria
-            if categoria.nome not in contagem_dias_por_categoria:
-                contagem_dias_por_categoria[categoria.nome] = 0
+            # Contador para essa categoria - USANDO ID DA CATEGORIA
+            if categoria.id_categoria not in contagem_dias_por_categoria:
+                contagem_dias_por_categoria[categoria.id_categoria] = 0
             
             while data_atual <= evento.datafim:
                 # Verifica se o dia da semana é válido (1=Segunda até 7=Domingo)
@@ -166,19 +166,20 @@ def eventos_calendario(id):
                         'id': evento.id_evento,
                         'title': evento.titulo,
                         'start': data_atual.isoformat(),
-                        'end': (data_atual + timedelta(days=1)).isoformat(),  # Importante para visualização correta
-                        'allDay': True,  # Garante que o evento ocupa o dia todo
+                        'end': (data_atual + timedelta(days=1)).isoformat(),
+                        'allDay': True,
                         'backgroundColor': categoria.corassociada,
                         'borderColor': categoria.corassociada,
-                        'textColor': '#ffffff',  # Texto branco para melhor contraste
+                        'textColor': '#ffffff',
                         'description': evento.descricao or '',
                         'location': evento.local or '',
                         'categoria_nome': categoria.nome,
+                        'categoria_id': categoria.id_categoria,  # Adicionado ID da categoria
                         'evento_original_id': evento.id_evento
                     })
                     
                     # Incrementa a contagem de dias válidos
-                    contagem_dias_por_categoria[categoria.nome] += 1
+                    contagem_dias_por_categoria[categoria.id_categoria] += 1
                 
                 data_atual += timedelta(days=1)
         else:
@@ -194,19 +195,20 @@ def eventos_calendario(id):
                 'textColor': '#ffffff',
                 'description': evento.descricao or '',
                 'location': evento.local or '',
-                'categoria_nome': categoria.nome
+                'categoria_nome': categoria.nome,
+                'categoria_id': categoria.id_categoria  # Adicionado ID da categoria
             })
             
             # Para eventos sem restrição de dias, conta todos os dias
-            if categoria.nome not in contagem_dias_por_categoria:
-                contagem_dias_por_categoria[categoria.nome] = 0
+            if categoria.id_categoria not in contagem_dias_por_categoria:
+                contagem_dias_por_categoria[categoria.id_categoria] = 0
                 
-            contagem_dias_por_categoria[categoria.nome] += (evento.datafim - evento.datainicio).days + 1
+            contagem_dias_por_categoria[categoria.id_categoria] += (evento.datafim - evento.datainicio).days + 1
     
-    # Inicializa contadores para categorias sem eventos
+    # Inicializa contadores para categorias sem eventos - POR ID
     for categoria in categorias:
-        if categoria.nome not in contagem_dias_por_categoria:
-            contagem_dias_por_categoria[categoria.nome] = 0
+        if categoria.id_categoria not in contagem_dias_por_categoria:
+            contagem_dias_por_categoria[categoria.id_categoria] = 0
     
     if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
         return jsonify(eventos_formatados)

@@ -157,7 +157,7 @@
 
                             {% if categoria.habilitacaocontagem %}
                             <div class="dias-validos">
-                                {{ contagem_dias_por_categoria.get(categoria.nome, 0) }}/{{ categoria.totaldias }} dias
+                                {{ contagem_dias_por_categoria.get(categoria.id_categoria, 0) }}/{{ categoria.totaldias }} dias
                             </div>
                             {% endif %}
                         </div>

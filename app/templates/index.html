@@ -1,82 +1,89 @@
 {% extends 'base.html' %}
 
-{% block title %}Sistema de Calendário Acadêmico - Início{% endblock %}
+{% block title %}Sistema de Calendários Acadêmicos{% endblock %}
 
 {% block content %}
 <div class="jumbotron">
-    <h1 class="display-4">Sistema de Calendário Acadêmico</h1>
-    <p class="lead">Gerencie períodos, calendários e eventos acadêmicos de forma fácil e eficiente.</p>
-    <hr class="my-4">
-    <p>Acesse os calendários ativos abaixo ou utilize o menu de navegação para gerenciar todos os recursos.</p>
+    <h1 class="display-4">Sistema de Calendários Acadêmicos</h1>
+    <p class="lead">Gerenciamento completo do calendário acadêmico da instituição</p>
 </div>
 
+<!-- Calendários Ativos -->
+<div class="card mb-4">
+    <div class="card-header bg-primary text-white">
+        <h5 class="mb-0">Calendários Ativos</h5>
+    </div>
+    <div class="card-body">
+        {% if calendarios_ativos %}
+        <div class="row">
+            {% for calendario in calendarios_ativos %}
+            <div class="col-md-6 mb-3">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <h5 class="card-title">{{ calendario.nome }}</h5>
+                        <h6 class="card-subtitle mb-2 text-muted">{{ calendario.tipo_calendario.nome }}</h6>
+                        <p>
+                            <strong>Ano:</strong> {{ calendario.ano }}<br>
+                            <strong>Período:</strong> {{ calendario.datainicio.strftime('%d/%m/%Y') }} a {{
+                            calendario.datafim.strftime('%d/%m/%Y') }}
+                        </p>
+                        <a href="{{ url_for('evento.eventos_calendario', id=calendario.id_calendario) }}"
+                            class="btn btn-primary">
+                            <i class="fas fa-calendar-week"></i> Visualizar Eventos
+                        </a>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="alert alert-info">
+            <i class="fas fa-info-circle"></i> Não há calendários ativos no momento.
+            <a href="{{ url_for('calendario.novo') }}" class="alert-link">Criar um novo calendário</a> ou
+            <a href="{{ url_for('calendario.listar') }}" class="alert-link">ativar um existente</a>.
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Estatísticas -->
 <div class="row">
-    <div class="col-md-8">
+    <div class="col-md-6">
         <div class="card mb-4">
-            <div class="card-header bg-primary text-white">
-                <h4 class="mb-0">Calendários Ativos</h4>
+            <div class="card-header bg-success text-white">
+                <h5 class="mb-0">Estatísticas</h5>
             </div>
             <div class="card-body">
-                {% if calendarios %}
-                    <div class="row">
-                        {% for calendario in calendarios %}
-                            <div class="col-md-6 mb-3">
-                                <div class="card h-100">
-                                    <div class="card-body">
-                                        <h5 class="card-title">{{ calendario.nome }}</h5>
-                                        <h6 class="card-subtitle mb-2 text-muted">{{ calendario.tipo_calendario.nome }}</h6>
-                                        <p class="card-text">
-                                            <small>
-                                                <strong>Ano:</strong> {{ calendario.ano }}<br>
-                                                <strong>Período:</strong> {{ calendario.datainicio.strftime('%d/%m/%Y') }} a {{ calendario.datafim.strftime('%d/%m/%Y') }}
-                                            </small>
-                                        </p>
-                                    </div>
-                                    <div class="card-footer">
-                                        <a href="{{ url_for('evento.eventos_calendario', id=calendario.id_calendario) }}" class="btn btn-primary btn-sm">
-                                            <i class="far fa-calendar-alt"></i> Visualizar Eventos
-                                        </a>
-                                    </div>
-                                </div>
-                            </div>
-                        {% endfor %}
-                    </div>
-                {% else %}
-                    <div class="alert alert-info">
-                        Não há calendários ativos para o ano corrente.
-                    </div>
-                {% endif %}
+                <ul class="list-group list-group-flush">
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        Calendários Ativos
+                        <span class="badge badge-primary badge-pill">{{ calendarios_ativos|length }}</span>
+                    </li>
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        Total de Eventos
+                        <span class="badge badge-primary badge-pill">{{ total_eventos }}</span>
+                    </li>
+                </ul>
             </div>
         </div>
     </div>
-    
-    <div class="col-md-4">
-        <div class="card">
+
+    <div class="col-md-6">
+        <div class="card mb-4">
             <div class="card-header bg-info text-white">
-                <h4 class="mb-0">Próximos Eventos</h4>
+                <h5 class="mb-0">Eventos Próximos</h5>
             </div>
-            <div class="card-body p-0">
+            <div class="card-body">
                 {% if eventos_proximos %}
-                    <ul class="list-group list-group-flush">
-                        {% for evento in eventos_proximos %}
-                            <li class="list-group-item">
-                                <h6 class="mb-1">{{ evento.titulo }}</h6>
-                                <p class="mb-1 text-muted">
-                                    <i class="far fa-calendar-alt"></i> {{ evento.datainicio.strftime('%d/%m/%Y') }}
-                                    {% if evento.datainicio != evento.datafim %}
-                                        a {{ evento.datafim.strftime('%d/%m/%Y') }}
-                                    {% endif %}
-                                </p>
-                                {% if evento.local %}
-                                    <small><i class="fas fa-map-marker-alt"></i> {{ evento.local }}</small>
-                                {% endif %}
-                            </li>
-                        {% endfor %}
-                    </ul>
+                <ul class="list-group list-group-flush">
+                    {% for evento in eventos_proximos %}
+                    <li class="list-group-item">
+                        <strong>{{ evento.datainicio.strftime('%d/%m/%Y') }}</strong>: {{ evento.titulo }}
+                    </li>
+                    {% endfor %}
+                </ul>
                 {% else %}
-                    <div class="alert alert-info m-3">
-                        Não há eventos próximos agendados.
-                    </div>
+                <p class="text-muted">Não há eventos próximos agendados.</p>
                 {% endif %}
             </div>
         </div>

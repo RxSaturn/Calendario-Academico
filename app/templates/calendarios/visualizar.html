@@ -1,15 +1,15 @@
 {% extends 'base.html' %}
 
-{% block title %}Calendário: {{ calendario.nome }}{% endblock %}
+{% block title %}{{ calendario.nome }}{% endblock %}
 
 {% block content %}
 <div class="d-flex justify-content-between align-items-center mb-4">
     <h2>{{ calendario.nome }} ({{ calendario.ano }})</h2>
     <div>
-        <a href="{{ url_for('evento.eventos_calendario', id=calendario.id_calendario) }}" class="btn btn-success mr-2">
-            <i class="far fa-calendar-alt"></i> Ver Eventos
+        <a href="{{ url_for('evento.eventos_calendario', id=calendario.id_calendario) }}" class="btn btn-success">
+            <i class="fas fa-calendar-week"></i> Ver Eventos
         </a>
-        <a href="{{ url_for('calendario.copiar', id=calendario.id_calendario) }}" class="btn btn-info mr-2">
+        <a href="{{ url_for('calendario.copiar', id=calendario.id_calendario) }}" class="btn btn-info">
             <i class="fas fa-copy"></i> Copiar Calendário
         </a>
         <a href="{{ url_for('calendario.listar') }}" class="btn btn-secondary">
@@ -26,119 +26,135 @@
             </div>
             <div class="card-body">
                 <table class="table table-striped">
-                    <tbody>
-                        <tr>
-                            <th scope="row">ID:</th>
-                            <td>{{ calendario.id_calendario }}</td>
-                        </tr>
-                        <tr>
-                            <th scope="row">Nome:</th>
-                            <td>{{ calendario.nome }}</td>
-                        </tr>
-                        <tr>
-                            <th scope="row">Tipo:</th>
-                            <td>{{ calendario.tipo_calendario.nome }} ({{ calendario.tipo_calendario.sigla }})</td>
-                        </tr>
-                        <tr>
-                            <th scope="row">Ano:</th>
-                            <td>{{ calendario.ano }}</td>
-                        </tr>
-                        <tr>
-                            <th scope="row">Data Início:</th>
-                            <td>{{ calendario.datainicio.strftime('%d/%m/%Y') }}</td>
-                        </tr>
-                        <tr>
-                            <th scope="row">Data Fim:</th>
-                            <td>{{ calendario.datafim.strftime('%d/%m/%Y') }}</td>
-                        </tr>
-                        <tr>
-                            <th scope="row">Status:</th>
-                            <td>
-                                {% if calendario.ativo %}
-                                    <span class="badge badge-success">Ativo</span>
-                                {% else %}
-                                    <span class="badge badge-secondary">Inativo</span>
-                                {% endif %}
-                            </td>
-                        </tr>
-                    </tbody>
+                    <tr>
+                        <th>ID:</th>
+                        <td>{{ calendario.id_calendario }}</td>
+                    </tr>
+                    <tr>
+                        <th>Nome:</th>
+                        <td>{{ calendario.nome }}</td>
+                    </tr>
+                    <tr>
+                        <th>Tipo:</th>
+                        <td>{{ calendario.tipo_calendario.nome }} ({{ calendario.tipo_calendario.sigla }})</td>
+                    </tr>
+                    <tr>
+                        <th>Ano:</th>
+                        <td>{{ calendario.ano }}</td>
+                    </tr>
+                    <tr>
+                        <th>Data Início:</th>
+                        <td>{{ calendario.datainicio.strftime('%d/%m/%Y') }}</td>
+                    </tr>
+                    <tr>
+                        <th>Data Fim:</th>
+                        <td>{{ calendario.datafim.strftime('%d/%m/%Y') }}</td>
+                    </tr>
+                    <tr>
+                        <th>Status:</th>
+                        <td>
+                            <span class="badge badge-{{ 'success' if calendario.ativo else 'secondary' }}">
+                                {{ 'Ativo' if calendario.ativo else 'Inativo' }}
+                            </span>
+
+                            <form method="POST"
+                                action="{{ url_for('calendario.alternar_status', id=calendario.id_calendario) }}"
+                                class="d-inline">
+                                <button type="submit"
+                                    class="btn btn-sm btn-outline-{{ 'danger' if calendario.ativo else 'success' }}">
+                                    {{ 'Desativar' if calendario.ativo else 'Ativar' }}
+                                </button>
+                            </form>
+                        </td>
+                    </tr>
                 </table>
             </div>
         </div>
     </div>
 
     <div class="col-md-6">
-        <div class="card">
+        <div class="card mb-4">
             <div class="card-header bg-info text-white">
                 <h5 class="mb-0">Categorias do Calendário</h5>
             </div>
             <div class="card-body">
-                {% if calendario.categorias %}
-                    <div class="table-responsive">
-                        <table class="table table-sm">
-                            <thead>
-                                <tr>
-                                    <th>Nome</th>
-                                    <th>Cor</th>
-                                    <th>Período</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {% for categoria in calendario.categorias %}
-                                    <tr>
-                                        <td>{{ categoria.nome }}</td>
-                                        <td>
-                                            <span class="d-inline-block" style="width: 20px; height: 20px; background-color: {{ categoria.corassociada }}; border-radius: 3px;"></span>
-                                        </td>
-                                        <td>{{ categoria.periodo.descricao }}</td>
-                                    </tr>
-                                {% endfor %}
-                            </tbody>
-                        </table>
-                    </div>
-                {% else %}
-                    <div class="alert alert-info">
-                        Nenhuma categoria associada a este calendário.
-                    </div>
-                {% endif %}
-                
-                <div class="mt-3">
-                    <a href="{{ url_for('categoria.novo') }}" class="btn btn-sm btn-primary">
-                        <i class="fas fa-plus"></i> Adicionar Categoria
-                    </a>
-                </div>
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>Nome</th>
+                            <th>Cor</th>
+                            <th>Período</th>
+                            <th>Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for categoria in calendario.categorias %}
+                        <tr>
+                            <td>{{ categoria.nome }}</td>
+                            <td>
+                                <span class="color-box"
+                                    style="display: inline-block; width: 20px; height: 20px; background-color: {{ categoria.corassociada }}"></span>
+                            </td>
+                            <td>{{ categoria.periodo.descricao }}</td>
+                            <td>
+                                <a href="{{ url_for('categoria.editar', id=categoria.id_categoria) }}"
+                                    class="btn btn-sm btn-outline-primary" title="Editar">
+                                    <i class="fas fa-edit"></i>
+                                </a>
+                                <button type="button" class="btn btn-sm btn-outline-danger"
+                                    onclick="confirmarRemocaoCategoria({{ categoria.id_categoria }}, '{{ categoria.nome }}')"
+                                    title="Remover">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+
+                <a href="{{ url_for('categoria.nova_para_calendario', id_calendario=calendario.id_calendario) }}"
+                    class="btn btn-primary">
+                    <i class="fas fa-plus"></i> Adicionar Categoria
+                </a>
             </div>
         </div>
     </div>
 </div>
 
-{% if calendario.categorias %}
-    <div class="card mt-4">
-        <div class="card-header bg-success text-white">
-            <h5 class="mb-0">Resumo de Eventos</h5>
-        </div>
-        <div class="card-body">
-            <div class="row">
-                {% for categoria in calendario.categorias %}
-                    <div class="col-md-4 mb-3">
-                        <div class="card h-100 border-0 shadow-sm">
-                            <div class="card-header" style="background-color: {{ categoria.corassociada }}; color: white;">
-                                <h6 class="mb-0">{{ categoria.nome }}</h6>
-                            </div>
-                            <div class="card-body">
-                                <p class="card-text">
-                                    <strong>Período:</strong> {{ categoria.periodo.descricao }}<br>
-                                    <strong>Eventos:</strong> {{ categoria.eventos|length }}
-                                    {% if categoria.totaldias %}
-                                        <br><strong>Total Dias:</strong> {{ categoria.totaldias }}
-                                    {% endif %}
-                                </p>
-                            </div>
-                        </div>
-                    </div>
-                {% endfor %}
+<!-- Modal de confirmação de remoção de categoria -->
+<div class="modal fade" id="confirmarRemocaoModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Confirmar Remoção</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <p>Tem certeza que deseja remover a categoria <strong id="categoriaNome"></strong>?</p>
+                <p class="text-danger">
+                    <i class="fas fa-exclamation-triangle"></i> Esta ação removerá todos os eventos associados a esta
+                    categoria!
+                </p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
+                <form id="formRemoverCategoria" method="POST" action="">
+                    <button type="submit" class="btn btn-danger">Remover</button>
+                </form>
             </div>
         </div>
     </div>
-{% endif %}
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    function confirmarRemocaoCategoria(id, nome) {
+        document.getElementById('categoriaNome').textContent = nome;
+        document.getElementById('formRemoverCategoria').action = "{{ url_for('categoria.remover', id=0) }}".replace('0', id);
+        $('#confirmarRemocaoModal').modal('show');
+    }
+</script>
 {% endblock %}
