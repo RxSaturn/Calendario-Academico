@@ -3,6 +3,7 @@ from app import db
 from app.models.models import Eventos, CategoriaCalendario, Calendario
 from app.forms import EventoForm
 from sqlalchemy import or_, and_
+from datetime import datetime, timedelta
 
 evento_bp = Blueprint('evento', __name__, url_prefix='/eventos')
 
@@ -131,47 +132,89 @@ def eventos_calendario(id):
     categorias = CategoriaCalendario.query.filter_by(id_calendario=id).all()
     categoria_ids = [c.id_categoria for c in categorias]
     
+    # Mapeamento de categorias para fácil acesso
+    categorias_dict = {c.id_categoria: c for c in categorias}
+    
     eventos = Eventos.query.filter(Eventos.id_categoria.in_(categoria_ids)).all()
     
-    # Formatar eventos para o fullCalendar
+    # Formatar eventos para o fullCalendar respeitando dias válidos
     eventos_formatados = []
+    contagem_dias_por_categoria = {}
+    
     for evento in eventos:
-        # Obtém o objeto categoria associado ao evento
-        categoria_evento = CategoriaCalendario.query.get(evento.id_categoria)
+        categoria = categorias_dict.get(evento.id_categoria)
+        dias_semana_validos = []
         
-        eventos_formatados.append({
-            'id': evento.id_evento,
-            'title': evento.titulo,
-            'start': evento.datainicio.isoformat(),
-            'end': evento.datafim.isoformat(),
-            'allDay': evento.dia_todo,
-            'color': categoria_evento.corassociada,
-            'description': evento.descricao or '',
-            'location': evento.local or '',
-            'categoria_nome': categoria_evento.nome  # Adiciona o nome da categoria para uso no modal
-        })
+        # Verificar se a categoria tem dias da semana válidos definidos
+        if categoria.diassemanasvalidos:
+            dias_semana_validos = [int(d) for d in categoria.diassemanasvalidos]
+        
+        # Se existem restrições de dias da semana
+        if dias_semana_validos:
+            # Criar eventos individuais para cada dia válido
+            data_atual = evento.datainicio
+            
+            # Contador para essa categoria
+            if categoria.nome not in contagem_dias_por_categoria:
+                contagem_dias_por_categoria[categoria.nome] = 0
+            
+            while data_atual <= evento.datafim:
+                # Verifica se o dia da semana é válido (1=Segunda até 7=Domingo)
+                if data_atual.isoweekday() in dias_semana_validos:
+                    # Adiciona um evento individual para este dia
+                    eventos_formatados.append({
+                        'id': evento.id_evento,
+                        'title': evento.titulo,
+                        'start': data_atual.isoformat(),
+                        'end': (data_atual + timedelta(days=1)).isoformat(),  # Importante para visualização correta
+                        'allDay': True,  # Garante que o evento ocupa o dia todo
+                        'backgroundColor': categoria.corassociada,
+                        'borderColor': categoria.corassociada,
+                        'textColor': '#ffffff',  # Texto branco para melhor contraste
+                        'description': evento.descricao or '',
+                        'location': evento.local or '',
+                        'categoria_nome': categoria.nome,
+                        'evento_original_id': evento.id_evento
+                    })
+                    
+                    # Incrementa a contagem de dias válidos
+                    contagem_dias_por_categoria[categoria.nome] += 1
+                
+                data_atual += timedelta(days=1)
+        else:
+            # Se não há restrição de dias, adiciona o evento normalmente
+            eventos_formatados.append({
+                'id': evento.id_evento,
+                'title': evento.titulo,
+                'start': evento.datainicio.isoformat(),
+                'end': evento.datafim.isoformat(),
+                'allDay': evento.dia_todo,
+                'backgroundColor': categoria.corassociada,
+                'borderColor': categoria.corassociada,
+                'textColor': '#ffffff',
+                'description': evento.descricao or '',
+                'location': evento.local or '',
+                'categoria_nome': categoria.nome
+            })
+            
+            # Para eventos sem restrição de dias, conta todos os dias
+            if categoria.nome not in contagem_dias_por_categoria:
+                contagem_dias_por_categoria[categoria.nome] = 0
+                
+            contagem_dias_por_categoria[categoria.nome] += (evento.datafim - evento.datainicio).days + 1
+    
+    # Inicializa contadores para categorias sem eventos
+    for categoria in categorias:
+        if categoria.nome not in contagem_dias_por_categoria:
+            contagem_dias_por_categoria[categoria.nome] = 0
     
     if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
         return jsonify(eventos_formatados)
     
     return render_template('eventos/calendario.html', 
                            calendario=calendario, 
-                           eventos=eventos_formatados)
-
-def verificar_conflitos(evento, evento_id=None):
-    """Verifica se há conflitos com outros eventos na mesma categoria e período"""
-    query = Eventos.query.filter(
-        Eventos.id_categoria == evento.id_categoria,
-        and_(
-            Eventos.datainicio <= evento.datafim,
-            Eventos.datafim >= evento.datainicio
-        )
-    )
-    
-    if evento_id:
-        query = query.filter(Eventos.id_evento != evento_id)
-        
-    return query.all()
+                           eventos=eventos_formatados,
+                           contagem_dias_por_categoria=contagem_dias_por_categoria)
 
 @evento_bp.route('/relatorio/<int:id>')
 def relatorio_calendario(id):
@@ -197,3 +240,18 @@ def relatorio_calendario(id):
     return render_template('eventos/relatorio.html', 
                           calendario=calendario, 
                           dados_categorias=dados_categorias)
+
+def verificar_conflitos(evento, evento_id=None):
+    """Verifica se há conflitos com outros eventos na mesma categoria e período"""
+    query = Eventos.query.filter(
+        Eventos.id_categoria == evento.id_categoria,
+        and_(
+            Eventos.datainicio <= evento.datafim,
+            Eventos.datafim >= evento.datainicio
+        )
+    )
+    
+    if evento_id:
+        query = query.filter(Eventos.id_evento != evento_id)
+        
+    return query.all()

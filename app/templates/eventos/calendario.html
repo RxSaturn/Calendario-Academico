@@ -23,6 +23,31 @@
         cursor: pointer;
     }
 
+    /* Estilo para os eventos do calendário */
+    .fc-daygrid-event {
+        white-space: normal !important;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        padding: 2px 4px !important;
+        font-size: 0.85em;
+        line-height: 1.3;
+    }
+
+    /* Limitar altura dos eventos */
+    .fc-daygrid-event-harness {
+        max-height: 40px;
+    }
+
+    /* Melhora a visualização de eventos em dias pequenos */
+    .fc-daygrid-day-events {
+        padding: 0 !important;
+    }
+
+    .fc-daygrid-day-number {
+        font-weight: bold;
+    }
+
+    /* Estilização da legenda */
     .legenda-item {
         display: flex;
         align-items: center;
@@ -37,18 +62,33 @@
         flex-shrink: 0;
     }
 
-    /* Melhorias na barra de progresso */
-    .progress {
-        height: 25px;
+    .periodo-section {
         margin-bottom: 15px;
+        padding-bottom: 10px;
+        border-bottom: 1px solid #eee;
     }
 
-    .progress-bar {
-        font-size: 14px;
-        line-height: 25px;
-        font-weight: bold;
-        text-shadow: 1px 1px 1px rgba(0, 0, 0, 0.3);
-        padding: 0 5px;
+    .periodo-titulo {
+        font-weight: 600;
+        margin-bottom: 10px;
+        color: #495057;
+    }
+
+    /* Estilização da contagem de dias */
+    .categoria-info {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        width: 100%;
+    }
+
+    .dias-validos {
+        font-size: 0.85em;
+        color: #6c757d;
+        background-color: #f8f9fa;
+        padding: 2px 5px;
+        border-radius: 3px;
+        white-space: nowrap;
     }
 </style>
 {% endblock %}
@@ -81,11 +121,48 @@
                 <h5 class="mb-0">Legenda</h5>
             </div>
             <div class="card-body">
-                <!-- Obtém as categorias diretamente das categorias do calendário -->
+                <!-- Organizar categorias por período -->
+                {% set periodos_dict = {} %}
+                {% set categoria_eventos = {} %}
+
+                <!-- Contagem de eventos por categoria para estatísticas -->
+                {% for evento in eventos %}
+                {% if evento.categoria_nome in categoria_eventos %}
+                {% set _ = categoria_eventos.update({evento.categoria_nome: categoria_eventos[evento.categoria_nome] +
+                1}) %}
+                {% else %}
+                {% set _ = categoria_eventos.update({evento.categoria_nome: 1}) %}
+                {% endif %}
+                {% endfor %}
+
                 {% for categoria in calendario.categorias %}
-                <div class="legenda-item">
-                    <div class="legenda-cor" style="background-color: {{ categoria.corassociada }};"></div>
-                    <span>{{ categoria.nome }}</span>
+                {% if categoria.periodo.id_periodo not in periodos_dict %}
+                {% set _ = periodos_dict.update({categoria.periodo.id_periodo: {'nome': categoria.periodo.descricao,
+                'categorias': []}}) %}
+                {% endif %}
+                {% set _ = periodos_dict[categoria.periodo.id_periodo]['categorias'].append(categoria) %}
+                {% endfor %}
+
+                <!-- Exibir categorias separadas por período -->
+                {% for periodo_id, periodo_info in periodos_dict.items() %}
+                <div class="periodo-section">
+                    <div class="periodo-titulo">{{ periodo_info.nome }}</div>
+                    {% for categoria in periodo_info.categorias %}
+                    <div class="legenda-item">
+                        <div class="categoria-info">
+                            <div style="display: flex; align-items: center;">
+                                <div class="legenda-cor" style="background-color: {{ categoria.corassociada }};"></div>
+                                <span>{{ categoria.nome }}</span>
+                            </div>
+
+                            {% if categoria.habilitacaocontagem %}
+                            <div class="dias-validos">
+                                {{ contagem_dias_por_categoria.get(categoria.nome, 0) }}/{{ categoria.totaldias }} dias
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    {% endfor %}
                 </div>
                 {% endfor %}
             </div>
@@ -98,27 +175,18 @@
             <div class="card-body">
                 <p><strong>Total de Eventos:</strong> {{ eventos|length }}</p>
 
-                {% for categoria in calendario.categorias %}
-                {% if categoria.habilitacaocontagem %}
-                <div class="mb-3">
-                    <strong>{{ categoria.nome }}:</strong>
-                    <div class="progress mt-2">
-                        {% set qtd_eventos = categoria.eventos|length %}
-                        {% set total_dias = categoria.totaldias or 1 %}
-                        {% set porcentagem = (qtd_eventos / total_dias * 100)|round|int %}
-                        {% set porcentagem_display = porcentagem if porcentagem <= 100 else 100 %} <div
-                            class="progress-bar" role="progressbar"
-                            style="width: {{ porcentagem_display }}%; background-color: {{ categoria.corassociada }};"
-                            aria-valuenow="{{ qtd_eventos }}" aria-valuemin="0" aria-valuemax="{{ total_dias }}">
-                            {{ qtd_eventos }}/{{ total_dias }}
-                    </div>
-                </div>
+                <p><strong>Distribuição por Categoria:</strong></p>
+                <ul class="list-group list-group-flush">
+                    {% for nome, contagem in categoria_eventos.items() %}
+                    <li class="list-group-item d-flex justify-content-between align-items-center py-2">
+                        {{ nome }}
+                        <span class="badge badge-primary badge-pill">{{ contagem }}</span>
+                    </li>
+                    {% endfor %}
+                </ul>
             </div>
-            {% endif %}
-            {% endfor %}
         </div>
     </div>
-</div>
 </div>
 
 <!-- Modal de detalhes do evento -->
@@ -136,6 +204,7 @@
                 <p id="eventoDescricaoContainer"><strong>Descrição:</strong> <span id="eventoDescricao"></span></p>
                 <p id="eventoLocalContainer"><strong>Local:</strong> <span id="eventoLocal"></span></p>
                 <p><strong>Categoria:</strong> <span id="eventoCategoria"></span></p>
+                <p id="diasValidosContainer"><strong>Dias válidos:</strong> <span id="diasValidos"></span></p>
             </div>
             <div class="modal-footer">
                 <a href="#" id="eventoEditarLink" class="btn btn-primary">Editar</a>
@@ -204,7 +273,7 @@
                 localContainer.style.display = 'none';
             }
 
-            // Categoria - Busca a categoria pelo ID e exibe seu nome
+            // Categoria
             const categoria = info.event.extendedProps.categoria_nome || "Não definida";
             document.getElementById('eventoCategoria').textContent = categoria;
 
