@@ -1,0 +1,27 @@
+{% extends 'base.html' %}
+
+{% block title %}Erro Interno do Servidor{% endblock %}
+
+{% block content %}
+<div class="container text-center mt-5">
+    <div class="row">
+        <div class="col-md-8 offset-md-2">
+            <div class="card">
+                <div class="card-header bg-danger">
+                    <h2 class="text-white mb-0">500 - Erro Interno do Servidor</h2>
+                </div>
+                <div class="card-body">
+                    <div class="mb-4">
+                        <i class="fas fa-exclamation-circle text-danger" style="font-size: 4rem;"></i>
+                    </div>
+                    <h3>Algo deu errado!</h3>
+                    <p class="lead">Você está usando SQLite?</p>
+                    <a href="{{ url_for('main.index') }}" class="btn btn-primary mt-3">
+                        <i class="fas fa-home"></i> Voltar para a Página Inicial
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

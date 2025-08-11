@@ -1,4 +1,5 @@
 from flask import Blueprint, render_template, redirect, url_for, flash, request
+from sqlalchemy import text
 from app import db
 from app.models.models import CategoriaCalendario, Calendario, Periodo, Eventos
 from app.forms import CategoriaForm
@@ -146,3 +147,50 @@ def nova_para_calendario(id_calendario):
         return redirect(url_for('calendario.visualizar', id=id_calendario))
         
     return render_template('categorias/form.html', form=form, titulo=f'Nova Categoria para {calendario.nome}')
+
+@categoria_bp.route('/visualizar/<int:id>')
+def visualizar(id):
+    """
+    Visualiza detalhes de uma categoria específica e seus eventos associados.
+    Também demonstra o uso da função PostgreSQL contar_eventos_por_categoria.
+    """
+    categoria = CategoriaCalendario.query.get_or_404(id)
+    
+    # Usar a função PostgreSQL para contar eventos
+    try:
+        total_eventos_func = db.session.execute(
+            text("SELECT contar_eventos_por_categoria(:id_categoria)"),
+            {"id_categoria": id}
+        ).scalar()
+    except Exception as e:
+        # Caso a função não esteja disponível
+        total_eventos_func = None
+        flash(f"Função PostgreSQL não disponível: {str(e)}", "warning")
+    
+    # Buscar eventos associados a esta categoria
+    eventos = Eventos.query.filter_by(id_categoria=id).order_by(Eventos.datainicio).all()
+    
+    # Calcular total de dias (para categorias com habilitacaocontagem)
+    if categoria.habilitacaocontagem:
+        dias_letivos = len(set([evento.datainicio for evento in eventos]))
+    else:
+        dias_letivos = None
+    
+    # Calcular duração do período associado usando função PostgreSQL
+    try:
+        duracao_periodo = db.session.execute(
+            text("SELECT calcular_duracao_periodo(:id_periodo)"),
+            {"id_periodo": categoria.id_periodo}
+        ).scalar()
+    except Exception:
+        duracao_periodo = None
+    
+    return render_template(
+        'categorias/visualizar.html', 
+        categoria=categoria,
+        eventos=eventos,
+        total_eventos=len(eventos),
+        total_eventos_func=total_eventos_func,
+        dias_letivos=dias_letivos,
+        duracao_periodo=duracao_periodo
+    )

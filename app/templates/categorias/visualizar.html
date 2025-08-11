@@ -1,0 +1,190 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ categoria.nome }}{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2>{{ categoria.nome }}</h2>
+    <div>
+        <a href="{{ url_for('calendario.visualizar', id=categoria.id_calendario) }}" class="btn btn-primary">
+            <i class="fas fa-calendar"></i> Voltar ao Calendário
+        </a>
+        <a href="{{ url_for('categoria.editar', id=categoria.id_categoria) }}" class="btn btn-outline-primary">
+            <i class="fas fa-edit"></i> Editar
+        </a>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-5">
+        <div class="card mb-4">
+            <div class="card-header" style="background-color: {{ categoria.corassociada }}; color: white;">
+                <h5 class="mb-0">Detalhes da Categoria</h5>
+            </div>
+            <div class="card-body">
+                <table class="table table-striped">
+                    <tr>
+                        <th width="40%">ID:</th>
+                        <td>{{ categoria.id_categoria }}</td>
+                    </tr>
+                    <tr>
+                        <th>Nome:</th>
+                        <td>{{ categoria.nome }}</td>
+                    </tr>
+                    <tr>
+                        <th>Calendário:</th>
+                        <td>
+                            <a href="{{ url_for('calendario.visualizar', id=categoria.id_calendario) }}">
+                                {{ categoria.calendario.nome }} ({{ categoria.calendario.ano }})
+                            </a>
+                        </td>
+                    </tr>
+                    <tr>
+                        <th>Período:</th>
+                        <td>{{ categoria.periodo.descricao }}</td>
+                    </tr>
+                    <tr>
+                        <th>Cor:</th>
+                        <td>
+                            <span class="color-box"
+                                style="display: inline-block; width: 20px; height: 20px; background-color: {{ categoria.corassociada }}"></span>
+                            {{ categoria.corassociada }}
+                        </td>
+                    </tr>
+                    <tr>
+                        <th>Dias da Semana:</th>
+                        <td>
+                            {% set dias = {'1': 'Segunda', '2': 'Terça', '3': 'Quarta', '4': 'Quinta', '5': 'Sexta',
+                            '6': 'Sábado', '7': 'Domingo'} %}
+                            {% if categoria.diassemanasvalidos %}
+                            {% for dia in categoria.diassemanasvalidos %}
+                            {{ dias[dia] }}{% if not loop.last %}, {% endif %}
+                            {% endfor %}
+                            {% else %}
+                            Todos os dias
+                            {% endif %}
+                        </td>
+                    </tr>
+                    <tr>
+                        <th>Total de Dias:</th>
+                        <td>{{ categoria.totaldias or 'Não definido' }}</td>
+                    </tr>
+                    <tr>
+                        <th>Contagem Habilitada:</th>
+                        <td>
+                            {% if categoria.habilitacaocontagem %}
+                            <span class="badge badge-success">Sim</span>
+                            {% else %}
+                            <span class="badge badge-secondary">Não</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+
+        <div class="card mb-4">
+            <div class="card-header bg-info text-white">
+                <h5 class="mb-0">Estatísticas</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="card text-center bg-light mb-3">
+                            <div class="card-body">
+                                <h5 class="card-title">{{ total_eventos }}</h5>
+                                <p class="card-text">Eventos</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="card text-center bg-light mb-3">
+                            <div class="card-body">
+                                <h5 class="card-title">{{ dias_letivos or '-' }}</h5>
+                                <p class="card-text">Dias Letivos</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="alert alert-secondary mt-3">
+                    <small>
+                        <strong>Duração do Período:</strong> {{ duracao_periodo or 'N/A' }} dias<br>
+                        <strong>Total via Função PostgreSQL:</strong> {{ total_eventos_func or 'N/A' }} eventos
+                    </small>
+                </div>
+
+                {% if categoria.habilitacaocontagem and categoria.totaldias and dias_letivos %}
+                <div class="mt-3">
+                    <h6>Progresso:</h6>
+                    <div class="progress" style="height: 20px;">
+                        {% set porcentagem = (dias_letivos / categoria.totaldias * 100)|round|int %}
+                        <div class="progress-bar progress-bar-striped 
+                            {% if porcentagem < 30 %}bg-danger
+                            {% elif porcentagem < 70 %}bg-warning
+                            {% else %}bg-success{% endif %}" role="progressbar" style="width: {{ porcentagem }}%;"
+                            aria-valuenow="{{ porcentagem }}" aria-valuemin="0" aria-valuemax="100">{{ porcentagem }}%
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-7">
+        <div class="card">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0">Eventos ({{ total_eventos }})</h5>
+            </div>
+            <div class="card-body">
+                {% if eventos %}
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead class="thead-light">
+                            <tr>
+                                <th>Título</th>
+                                <th>Data Início</th>
+                                <th>Data Fim</th>
+                                <th>Local</th>
+                                <th>Dia Todo</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for evento in eventos %}
+                            <tr>
+                                <td>
+                                    <a href="{{ url_for('evento.editar', id=evento.id_evento) }}">
+                                        {{ evento.titulo }}
+                                    </a>
+                                </td>
+                                <td>{{ evento.datainicio.strftime('%d/%m/%Y') }}</td>
+                                <td>{{ evento.datafim.strftime('%d/%m/%Y') }}</td>
+                                <td>{{ evento.local or '-' }}</td>
+                                <td>
+                                    {% if evento.dia_todo %}
+                                    <i class="fas fa-check text-success"></i>
+                                    {% else %}
+                                    <i class="fas fa-times text-muted"></i>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <div class="alert alert-info">
+                    <i class="fas fa-info-circle"></i> Nenhum evento cadastrado para esta categoria.
+                </div>
+                {% endif %}
+
+                <a href="{{ url_for('evento.novo', id_categoria=categoria.id_categoria) }}"
+                    class="btn btn-success mt-3">
+                    <i class="fas fa-plus"></i> Adicionar Evento
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

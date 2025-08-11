@@ -1,0 +1,79 @@
+{% extends 'base.html' %}
+
+{% block title %}Eventos Ativos Hoje{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="card">
+        <div class="card-header bg-primary text-white">
+            <div class="d-flex justify-content-between align-items-center">
+                <h3 class="mb-0">Eventos Ativos no Período Atual</h3>
+                <a href="{{ url_for('relatorio.index') }}" class="btn btn-light">
+                    <i class="fas fa-arrow-left"></i> Voltar
+                </a>
+            </div>
+        </div>
+        <div class="card-body">
+            <p class="text-muted mb-4">
+                <i class="fas fa-info-circle"></i> 
+                Este relatório mostra os eventos ativos do período atual, usando a view <code>vw_eventos_ativos_hoje</code>.
+            </p>
+            
+            {% if eventos %}
+            <div class="table-responsive">
+                <table class="table table-striped table-hover">
+                    <thead class="thead-dark">
+                        <tr>
+                            <th>Título</th>
+                            <th>Data Início</th>
+                            <th>Data Fim</th>
+                            <th>Local</th>
+                            <th>Categoria</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for evento in eventos %}
+                        <tr>
+                            <td>{{ evento.titulo }}</td>
+                            <td>{{ evento.datainicio.strftime('%d/%m/%Y') }}</td>
+                            <td>{{ evento.datafim.strftime('%d/%m/%Y') }}</td>
+                            <td>{{ evento.local or '-' }}</td>
+                            <td>{{ evento.categoria }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <div class="alert alert-info">
+                <i class="fas fa-info-circle"></i> Não há eventos ativos no período atual.
+            </div>
+            {% endif %}
+        </div>
+        <div class="card-footer text-muted">
+            <small>Consulta SQL (vw_eventos_ativos_hoje):</small>
+            <pre class="mb-0"><code>SELECT 
+    e.titulo,
+    e.descricao,
+    e.datainicio,
+    e.datafim,
+    e.local,
+    cc.nome AS categoria
+FROM 
+    eventos e
+JOIN 
+    categoriacalendario cc ON e.id_categoria = cc.id_categoria
+JOIN 
+    calendario c ON cc.id_calendario = c.id_calendario
+JOIN 
+    periodo p ON cc.id_periodo = p.id_periodo
+WHERE 
+    c.ativo = true
+    AND CURRENT_DATE BETWEEN p.datainicial AND p.datafinal
+    AND e.datainicio >= CURRENT_DATE
+ORDER BY 
+    e.datainicio;</code></pre>
+        </div>
+    </div>
+</div>
+{% endblock %}
