@@ -81,6 +81,9 @@ flask db upgrade
 flask create-tables
 flask seed-db
 
+# Execute o script para corrigir as views
+python app/scripts/fix_views.py
+
 # Inicializar recursos avançados do PostgreSQL (visões, regras, funções, gatilhos)
 flask init-advanced-features
 ```
@@ -114,3 +117,11 @@ Este projeto segue a arquitetura MVC (Model-View-Controller):
   - Mapeamento de visões: views.py
 - Views: `app/templates/`
 - Controllers: `app/controllers/`
+
+## Recursos Avançados PostgreSQL
+A aplicação faz uso extensivo dos seguintes recursos avançados do PostgreSQL:
+
+- Visões (Views): Consultas pré-definidas para acesso rápido a informações
+- Regras (Rules): Mecanismos para controlar comportamentos específicos em tabelas
+- Funções (Functions): Lógica encapsulada para reutilização
+- Gatilhos (Triggers): Automação de ações em resposta a eventos no banco de dados

@@ -1,0 +1,51 @@
+{% extends 'base.html' %}
+
+{% block title %}Feriados do Ano{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="card">
+        <div class="card-header bg-primary text-white">
+            <div class="d-flex justify-content-between align-items-center">
+                <h3 class="mb-0">Feriados do Ano</h3>
+                <a href="{{ url_for('relatorio.index') }}" class="btn btn-light">
+                    <i class="fas fa-arrow-left"></i> Voltar
+                </a>
+            </div>
+        </div>
+        <div class="card-body">
+            <p class="text-muted mb-4">
+                <i class="fas fa-info-circle"></i> 
+                Este relatório lista todos os feriados do ano atual, usando a view <code>vw_feriados_do_ano</code>.
+            </p>
+            
+            {% if feriados %}
+            <div class="table-responsive">
+                <table class="table table-striped table-hover">
+                    <thead class="thead-dark">
+                        <tr>
+                            <th>Feriado</th>
+                            <th>Data</th>
+                            <th>Calendário</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for feriado in feriados %}
+                        <tr>
+                            <td>{{ feriado.feriado }}</td>
+                            <td>{{ feriado.datainicio.strftime('%d/%m/%Y') }}</td>
+                            <td>{{ feriado.calendario }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <div class="alert alert-info">
+                <i class="fas fa-info-circle"></i> Não há feriados cadastrados para o ano atual.
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
