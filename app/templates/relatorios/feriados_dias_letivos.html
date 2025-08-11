@@ -1,0 +1,55 @@
+{% extends 'base.html' %}
+
+{% block title %}Feriados em Dias Letivos{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="card">
+        <div class="card-header bg-primary text-white">
+            <div class="d-flex justify-content-between align-items-center">
+                <h3 class="mb-0">Feriados em Dias Letivos</h3>
+                <a href="{{ url_for('relatorio.index') }}" class="btn btn-light">
+                    <i class="fas fa-arrow-left"></i> Voltar
+                </a>
+            </div>
+        </div>
+        <div class="card-body">
+            <p class="text-muted mb-4">
+                <i class="fas fa-info-circle"></i> 
+                Este relatório mostra feriados que caem em dias normalmente letivos, usando a view <code>vw_feriados_dias_letivos</code>.
+            </p>
+            
+            {% if dados %}
+            <div class="table-responsive">
+                <table class="table table-striped table-hover">
+                    <thead class="thead-dark">
+                        <tr>
+                            <th>Feriado</th>
+                            <th>Data</th>
+                            <th>Dia da Semana</th>
+                            <th>Período</th>
+                            <th>Categoria Afetada</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for item in dados %}
+                        <tr>
+                            <td>{{ item.feriado }}</td>
+                            <td>{{ item.data.strftime('%d/%m/%Y') }}</td>
+                            <td>{{ item.dia_semana }}</td>
+                            <td>{{ item.periodo }}</td>
+                            <td>{{ item.categoria_afetada }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <div class="alert alert-info">
+                <i class="fas fa-info-circle"></i> Não há feriados em dias letivos.
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

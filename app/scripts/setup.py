@@ -47,28 +47,24 @@ def clean_sqlite_views():
         conn = sqlite3.connect(file_path)
         cursor = conn.cursor()
         
-        # Limpar qualquer view/tabela existente com nome de view
-        views_to_remove = [
-            'vw_eventos_ativos_hoje',
-            'vw_resumo_calendario',
-            'vw_eventos_futuros_ativos'
-        ]
+        # Verificar quais views existem
+        cursor.execute("SELECT name FROM sqlite_master WHERE type='view';")
+        existing_views = [row[0] for row in cursor.fetchall()]
         
-        for view_name in views_to_remove:
+        # Remover todas as views encontradas
+        for view_name in existing_views:
             try:
-                # Tentar como tabela
-                cursor.execute(f"DROP TABLE IF EXISTS {view_name}")
-                # Tentar como view
-                cursor.execute(f"DROP VIEW IF EXISTS {view_name}")
+                cursor.execute(f"DROP VIEW {view_name};")
+                logger.info(f"View {view_name} removida com sucesso")
             except Exception as e:
-                logger.warning(f"Aviso ao remover {view_name}: {str(e)}")
+                logger.warning(f"Erro ao remover view {view_name}: {str(e)}")
                 
         conn.commit()
         conn.close()
         logger.info("Limpeza SQLite concluída")
     except Exception as e:
         logger.error(f"Erro na limpeza SQLite: {str(e)}")
-
+        
 def setup_postgresql_features():
     """Implementa recursos avançados específicos do PostgreSQL"""
     try:
