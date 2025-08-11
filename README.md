@@ -71,9 +71,11 @@ SECRET_KEY=sua-chave-secreta
 DATABASE_URL=postgresql://seu_usuario:sua_senha@localhost/calendario_academico
 ```
 
+
 ## Inicialização do banco de dados
 
 ```bash
+
 # Inicializar as migrações
 flask db upgrade
 
