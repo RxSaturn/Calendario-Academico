@@ -15,6 +15,7 @@
         <a href="{{ url_for('calendario.listar') }}" class="btn btn-secondary">
             <i class="fas fa-arrow-left"></i> Voltar
         </a>
+        <a href="{{ url_for('categoria.visualizar', id=categoria.id_categoria) }}">{{ categoria.nome }}</a>
     </div>
 </div>
 

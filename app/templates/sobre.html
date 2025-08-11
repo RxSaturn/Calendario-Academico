@@ -10,30 +10,89 @@
     <div class="card-body">
         <h4>Sistema de Calendário Acadêmico</h4>
         <p class="lead">
-            Este sistema permite o gerenciamento completo de calendários acadêmicos, incluindo períodos, eventos, categorias e visualização de calendários.
+            Este sistema permite o gerenciamento completo de calendários acadêmicos de instituições de ensino, oferecendo recursos como categorização, visualização temporal, análises e identificação de conflitos.
         </p>
         
         <h5 class="mt-4">Principais Funcionalidades</h5>
-        <ul>
-            <li>Gerenciamento de períodos acadêmicos</li>
-            <li>Criação e edição de calendários por ano e tipo</li>
-            <li>Categorização de eventos com cores personalizadas</li>
-            <li>Visualização interativa de calendários</li>
-            <li>Detecção de conflitos de eventos</li>
-            <li>Relatórios de calendários</li>
-        </ul>
+        <div class="row">
+            <div class="col-md-6">
+                <ul>
+                    <li>Gerenciamento de períodos acadêmicos</li>
+                    <li>Criação e edição de calendários por ano e tipo</li>
+                    <li>Categorização de eventos com cores personalizadas</li>
+                    <li>Visualização interativa de calendários</li>
+                </ul>
+            </div>
+            <div class="col-md-6">
+                <ul>
+                    <li>Detecção automática de conflitos de eventos</li>
+                    <li>Relatórios analíticos via visões PostgreSQL</li>
+                    <li>Validação automática de regras acadêmicas</li>
+                    <li>Exportação de relatórios para impressão</li>
+                </ul>
+            </div>
+        </div>
         
-        <h5 class="mt-4">Tecnologias Utilizadas</h5>
-        <ul>
-            <li>Backend: Python com Flask e SQLAlchemy</li>
-            <li>Frontend: HTML, CSS com Bootstrap</li>
-            <li>Banco de dados: SQLite/PostgreSQL</li>
-            <li>Visualização de calendário: FullCalendar.js</li>
-        </ul>
+        <h5 class="mt-4">Recursos Avançados de Banco de Dados</h5>
+        <div class="row">
+            <div class="col-md-6">
+                <div class="card mb-3">
+                    <div class="card-header bg-info text-white">Visões (Views)</div>
+                    <div class="card-body">
+                        <p>Consultas pré-definidas que facilitam o acesso a informações complexas como eventos ativos, dias letivos e feriados em dias letivos.</p>
+                    </div>
+                </div>
+                <div class="card mb-3">
+                    <div class="card-header bg-info text-white">Regras (Rules)</div>
+                    <div class="card-body">
+                        <p>Mecanismos que controlam o comportamento dos dados, como impedir exclusão de períodos em uso e desativar automaticamente calendários encerrados.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="card mb-3">
+                    <div class="card-header bg-info text-white">Funções (Functions)</div>
+                    <div class="card-body">
+                        <p>Lógica encapsulada para cálculos específicos como duração de períodos e contagem de eventos por categoria.</p>
+                    </div>
+                </div>
+                <div class="card mb-3">
+                    <div class="card-header bg-info text-white">Gatilhos (Triggers)</div>
+                    <div class="card-body">
+                        <p>Automação de ações em resposta a eventos como marcar eventos de dia único como "dia todo" e impedir conflitos de local.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
         
-        <div class="mt-4 text-muted">
-            <p>Versão 1.0.0 - Desenvolvido para a disciplina de Banco de Dados I</p>
-            <p>© 2025 - Todos os direitos reservados</p>
+        <h5 class="mt-4">Arquitetura e Tecnologias</h5>
+        <div class="row">
+            <div class="col-md-6">
+                <h6><i class="fas fa-layer-group"></i> Arquitetura MVC</h6>
+                <ul>
+                    <li><strong>Models:</strong> SQLAlchemy ORM com mapeamento para visões</li>
+                    <li><strong>Views:</strong> Templates Jinja2 com Bootstrap</li>
+                    <li><strong>Controllers:</strong> Rotas Flask organizadas por entidade</li>
+                </ul>
+            </div>
+            <div class="col-md-6">
+                <h6><i class="fas fa-tools"></i> Stack Tecnológico</h6>
+                <ul>
+                    <li><strong>Backend:</strong> Python 3.8+ com Flask</li>
+                    <li><strong>Frontend:</strong> HTML5, CSS3, Bootstrap 4, FullCalendar.js</li>
+                    <li><strong>Banco de dados:</strong> PostgreSQL (recomendado) ou SQLite</li>
+                    <li><strong>ORM:</strong> SQLAlchemy com Flask-SQLAlchemy</li>
+                </ul>
+            </div>
+        </div>
+        
+        <hr class="my-4">
+        
+        <div class="text-muted">
+            <p>Desenvolvido como projeto para a disciplina de Banco de Dados I</p>
+            <p><strong>Autores:</strong> Henrique Augusto, Henrique Evangelista, Rayssa Mendes</p>
+            <p><strong>Professor:</strong> Marcos Roberto Ribeiro</p>
+            <p>Versão 1.0.0 - © 2025 - Todos os direitos reservados</p>
         </div>
     </div>
 </div>

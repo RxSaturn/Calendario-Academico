@@ -1,0 +1,169 @@
+{% extends 'base.html' %}
+
+{% block title %}Relatórios do Sistema{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="card">
+        <div class="card-header bg-primary text-white">
+            <h3 class="mb-0">Relatórios do Sistema</h3>
+        </div>
+        <div class="card-body">
+            <p class="lead">Relatórios gerados a partir das visões (views) do banco de dados.</p>
+
+            {% if not is_postgres %}
+            <div class="alert alert-warning">
+                <strong><i class="fas fa-exclamation-triangle"></i> Aviso:</strong>
+                Você está usando SQLite, que tem suporte limitado para visões avançadas. Apenas alguns relatórios estão
+                disponíveis.
+                Para acesso a todas as funcionalidades, recomendamos configurar um banco de dados PostgreSQL.
+            </div>
+            {% endif %}
+
+            <div class="row">
+                {% if views_disponiveis.eventos_ativos %}
+                <div class="col-md-4 mb-4">
+                    <div class="card h-100">
+                        <div class="card-header bg-info text-white">
+                            <h5 class="mb-0">Eventos Ativos</h5>
+                        </div>
+                        <div class="card-body">
+                            <p>Lista de eventos ativos no período atual.</p>
+                            <a href="{{ url_for('relatorio.eventos_ativos') }}" class="btn btn-outline-primary">
+                                <i class="fas fa-calendar-check"></i> Visualizar
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+
+                {% if views_disponiveis.dias_letivos %}
+                <div class="col-md-4 mb-4">
+                    <div class="card h-100">
+                        <div class="card-header bg-info text-white">
+                            <h5 class="mb-0">Dias Letivos</h5>
+                        </div>
+                        <div class="card-body">
+                            <p>Contagem de dias letivos por categoria e período.</p>
+                            <a href="{{ url_for('relatorio.dias_letivos') }}" class="btn btn-outline-primary">
+                                <i class="fas fa-calendar-day"></i> Visualizar
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+
+                {% if views_disponiveis.resumo_calendarios %}
+                <div class="col-md-4 mb-4">
+                    <div class="card h-100">
+                        <div class="card-header bg-info text-white">
+                            <h5 class="mb-0">Resumo de Calendários</h5>
+                        </div>
+                        <div class="card-body">
+                            <p>Visão geral de todos os calendários do sistema.</p>
+                            <a href="{{ url_for('relatorio.resumo_calendarios') }}" class="btn btn-outline-primary">
+                                <i class="fas fa-calendar-alt"></i> Visualizar
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+
+            <div class="row">
+                {% if views_disponiveis.feriados_dias_letivos %}
+                <div class="col-md-4 mb-4">
+                    <div class="card h-100">
+                        <div class="card-header bg-info text-white">
+                            <h5 class="mb-0">Feriados em Dias Letivos</h5>
+                        </div>
+                        <div class="card-body">
+                            <p>Feriados que caem em dias normalmente letivos.</p>
+                            <a href="{{ url_for('relatorio.feriados_dias_letivos') }}" class="btn btn-outline-primary">
+                                <i class="fas fa-calendar-times"></i> Visualizar
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+
+                {% if views_disponiveis.eventos_futuros %}
+                <div class="col-md-4 mb-4">
+                    <div class="card h-100">
+                        <div class="card-header bg-info text-white">
+                            <h5 class="mb-0">Eventos Futuros</h5>
+                        </div>
+                        <div class="card-body">
+                            <p>Lista de eventos futuros de calendários ativos.</p>
+                            <a href="{{ url_for('relatorio.eventos_futuros') }}" class="btn btn-outline-primary">
+                                <i class="fas fa-calendar-week"></i> Visualizar
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+
+                {% if views_disponiveis.feriados_ano %}
+                <div class="col-md-4 mb-4">
+                    <div class="card h-100">
+                        <div class="card-header bg-info text-white">
+                            <h5 class="mb-0">Feriados do Ano</h5>
+                        </div>
+                        <div class="card-body">
+                            <p>Lista completa dos feriados do ano atual.</p>
+                            <a href="{{ url_for('relatorio.feriados_ano') }}" class="btn btn-outline-primary">
+                                <i class="fas fa-umbrella-beach"></i> Visualizar
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+
+            <div class="row">
+                {% if views_disponiveis.dias_por_periodo %}
+                <div class="col-md-4 mb-4">
+                    <div class="card h-100">
+                        <div class="card-header bg-info text-white">
+                            <h5 class="mb-0">Dias por Período</h5>
+                        </div>
+                        <div class="card-body">
+                            <p>Total de dias letivos por período acadêmico.</p>
+                            <a href="{{ url_for('relatorio.dias_por_periodo') }}" class="btn btn-outline-primary">
+                                <i class="fas fa-calendar-day"></i> Visualizar
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+
+                {% if not is_postgres %}
+                <div class="col-md-4 mb-4">
+                    <div class="card h-100">
+                        <div class="card-header bg-success text-white">
+                            <h5 class="mb-0">Eventos Ativos (Alternativo)</h5>
+                        </div>
+                        <div class="card-body">
+                            <p>Implementação alternativa para SQLite usando SQLAlchemy.</p>
+                            <a href="{{ url_for('relatorio.eventos_ativos_alternativo') }}"
+                                class="btn btn-outline-primary">
+                                <i class="fas fa-database"></i> Visualizar
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+
+            {% if not views_disponiveis.eventos_ativos and not views_disponiveis.resumo_calendarios and not
+            views_disponiveis.eventos_futuros %}
+            <div class="alert alert-danger">
+                <h5><i class="fas fa-exclamation-circle"></i> Nenhuma visão encontrada!</h5>
+                <p>Para criar as visões necessárias, execute o seguinte comando:</p>
+                <pre><code>flask init-advanced-features</code></pre>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

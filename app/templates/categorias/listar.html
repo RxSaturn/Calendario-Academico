@@ -48,6 +48,10 @@
                                 </td>
                                 <td>
                                     <div class="btn-group btn-group-sm">
+                                        <a href="{{ url_for('categoria.visualizar', id=categoria.id_categoria) }}" class="btn btn-sm btn-outline-info"
+                                            title="Visualizar">
+                                            <i class="fas fa-eye"></i>
+                                        </a>
                                         <a href="{{ url_for('categoria.editar', id=categoria.id_categoria) }}" class="btn btn-outline-primary" title="Editar">
                                             <i class="fas fa-edit"></i>
                                         </a>

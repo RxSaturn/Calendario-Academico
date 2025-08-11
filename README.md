@@ -9,7 +9,8 @@ Sistema completo para gerenciamento de calendários acadêmicos, desenvolvido em
 - Categorização de eventos com cores personalizadas
 - Visualização interativa de calendários
 - Detecção de conflitos de eventos
-- Relatórios de calendários
+- Relatórios de calendários usando visões PostgreSQL
+- Recursos avançados do PostgreSQL (visões, regras, funções, gatilhos)
 
 ## Requisitos
 
@@ -79,6 +80,9 @@ flask db upgrade
 # Criar tabelas e popular com dados iniciais
 flask create-tables
 flask seed-db
+
+# Inicializar recursos avançados do PostgreSQL (visões, regras, funções, gatilhos)
+flask init-advanced-features
 ```
 
 ## Executando a aplicação
@@ -99,10 +103,14 @@ A aplicação estará disponível em http://127.0.0.1:5000/
    - Calendários
    - Categorias
    - Eventos
+   - Relatórios
 
 ## Desenvolvimento
 
 Este projeto segue a arquitetura MVC (Model-View-Controller):
+
 - Models: `app/models/`
+  - Modelos principais: models.py
+  - Mapeamento de visões: views.py
 - Views: `app/templates/`
 - Controllers: `app/controllers/`
